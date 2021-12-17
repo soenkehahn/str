@@ -1,0 +1,11 @@
+{
+  "name": "suckless-test-runner",
+  "version": "0.0.0",
+  "main": "index.ts",
+  "author": "Sönke Hahn <soenkehahn@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.4"
+  }
+}
