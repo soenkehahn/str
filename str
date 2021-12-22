@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
 
-dir="$(dirname $0)"
+echo here: "$@"
 
-"$dir/node_modules/.bin/ts-node" "$dir/index.ts"
+yarn ts-node "$@"

@@ -6,6 +6,7 @@ mod tests {
     use std::fs;
     use std::fs::create_dir_all;
     use std::path::Path;
+    use std::path::PathBuf;
     use std::process::ExitStatus;
     use tempfile::TempDir;
 
@@ -19,13 +20,39 @@ mod tests {
     }
 
     struct Context {
+        repo_dir: PathBuf,
         temp_dir: TempDir,
     }
 
     impl Context {
         fn new() -> Result<Self> {
+            let repo_dir = std::env::current_dir()?
+                .parent()
+                .ok_or(anyhow!("$REPO/tests has no parent"))?
+                .to_owned();
             let temp_dir = TempDir::new()?;
-            Ok(Context { temp_dir })
+            fs::write(
+                temp_dir.path().join("package.json"),
+                r#"
+                    {
+                        "name": "str-test",
+                        "version": "0.0.0",
+                        "private": true
+                    }
+                "#,
+            )?;
+            run!(%"yarn install --offline", CurrentDir(temp_dir.path()));
+            run!(
+                "yarn",
+                "add",
+                format!(
+                    "link:{}",
+                    repo_dir.to_str().ok_or(anyhow!("invalid utf-8"))?
+                ),
+                "--offline",
+                CurrentDir(temp_dir.path())
+            );
+            Ok(Context { temp_dir, repo_dir })
         }
 
         fn write<P: AsRef<Path>>(&self, path: P, content: &str) -> Result<()> {
@@ -37,7 +64,13 @@ mod tests {
         }
 
         fn run(&self, file: &str) -> Output {
-            let (Stderr(stderr), Status(status)) = ("../str", file).run_output();
+            let (Stderr(stderr), Status(status)) = (
+                self.repo_dir.join("str"),
+                file,
+                CurrentDir(self.temp_dir.path()),
+            )
+                .run_output();
+            eprintln!("STDERR:\n{}", stderr);
             Output { status, stderr }
         }
     }
@@ -53,6 +86,7 @@ mod tests {
         context.write(
             "src/index.test.ts",
             r#"
+                import { assertEq, it } from "str";
                 it("fails", () => {
                   assertEq(true, false);
                 });
@@ -60,7 +94,24 @@ mod tests {
         )?;
         let result = context.run("src/index.test.ts");
         assert_eq!(result.status.code(), Some(1));
-        assert_contains(result.stderr, "true\n    !=\nfalse".to_string());
+        assert_contains(result.stderr, "true\n    !==\nfalse".to_string());
+        Ok(())
+    }
+
+    #[test]
+    fn simple_test_success() -> Result<()> {
+        let context = Context::new()?;
+        context.write(
+            "src/index.test.ts",
+            r#"
+                import { assertEq, it } from "str";
+                it("works", () => {
+                  assertEq(true, true);
+                });
+            "#,
+        )?;
+        let result = context.run("src/index.test.ts");
+        assert_eq!(result.status.code(), Some(0));
         Ok(())
     }
 }
