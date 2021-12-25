@@ -8,5 +8,3 @@ export function assertEq<T>(a: T, b: T) {
     process.exit(1);
   }
 }
-
-// export { it };
