@@ -41,15 +41,17 @@ mod tests {
                     }
                 "#,
             )?;
-            run!(%"yarn install --offline", CurrentDir(temp_dir.path()));
+            run!(%"yarn install", CurrentDir(temp_dir.path()));
             run!(
                 "yarn",
                 "add",
                 format!(
                     "link:{}",
-                    repo_dir.to_str().ok_or(anyhow!("invalid utf-8"))?
+                    repo_dir
+                        .join("typescript-library")
+                        .to_str()
+                        .ok_or(anyhow!("invalid utf-8"))?
                 ),
-                "--offline",
                 CurrentDir(temp_dir.path())
             );
             Ok(Context { temp_dir, repo_dir })

@@ -10,8 +10,7 @@ run-example:
   #!/usr/bin/env bash
   set -eux
   cd example
-  yarn
-  yarn add link:..
+  yarn install
   ! ../str simple.ts
 
 render-readme:

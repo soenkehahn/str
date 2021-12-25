@@ -10,6 +10,6 @@ RUN just install
 ADD tests/from-scratch/ /user-dir/
 WORKDIR /user-dir
 RUN yarn install
-RUN yarn add link:/str --prefer-offline
+RUN yarn add link:/str/typescript-library
 
 ENTRYPOINT ["str"]
