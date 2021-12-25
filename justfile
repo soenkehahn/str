@@ -1,10 +1,10 @@
 ci: test integration run-example render-readme-check
 
 test *args="":
-  (cd tests ; cargo test --lib -- --test-threads=1 {{ args }})
+  (cargo test --lib -- --test-threads=1 {{ args }})
 
 integration:
-  (cd tests ; cargo test integration -- --test-threads=1)
+  (cargo test integration -- --test-threads=1)
 
 run-example:
   #!/usr/bin/env bash

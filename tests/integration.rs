@@ -16,8 +16,8 @@ fn integration_test() -> Result<()> {
         &LogCommand,
         "podman",
         "build",
-        ("-f", "from-scratch/Dockerfile"),
-        "../",
+        ("-f", "tests/from-scratch/Dockerfile"),
+        ".",
     );
     build_command.run_result()?;
     let StdoutTrimmed(image) = (build_command, "--quiet").run_result()?;
