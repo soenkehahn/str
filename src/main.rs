@@ -43,7 +43,7 @@ mod tests {
 
     impl Context {
         fn new() -> Result<Self> {
-            let repo_dir = std::env::current_dir()?.to_owned();
+            let repo_dir = std::env::current_dir()?;
             let temp_dir = TempDir::new()?;
             fs::write(
                 temp_dir.path().join("package.json"),

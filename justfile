@@ -1,4 +1,4 @@
-ci: test run-example render-readme-check integration
+ci: test run-example clippy render-readme-check integration
 
 test *args="":
   (cargo test --bin str -- --test-threads=1 {{ args }})
@@ -12,6 +12,9 @@ run-example:
   cd example
   yarn install
   cargo run simple.ts || true
+
+clippy:
+  cargo clippy --tests
 
 render-readme:
   php README.php > README.md
