@@ -117,6 +117,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f2cc38e8fa666e2de3c4aba7edeb5ffc5246c1c2ed0e3d17e560aeeba736b23f"
 
 [[package]]
+name = "str"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "cradle",
+ "tempfile",
+]
+
+[[package]]
 name = "tempfile"
 version = "3.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -128,15 +137,6 @@ dependencies = [
  "redox_syscall",
  "remove_dir_all",
  "winapi",
-]
-
-[[package]]
-name = "tests"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "cradle",
- "tempfile",
 ]
 
 [[package]]

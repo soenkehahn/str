@@ -1,7 +1,7 @@
-ci: test integration run-example render-readme-check
+ci: test run-example render-readme-check integration
 
 test *args="":
-  (cargo test --lib -- --test-threads=1 {{ args }})
+  (cargo test --bin str -- --test-threads=1 {{ args }})
 
 integration:
   (cargo test integration -- --test-threads=1)
@@ -11,7 +11,7 @@ run-example:
   set -eux
   cd example
   yarn install
-  ! ../str simple.ts
+  cargo run simple.ts || true
 
 render-readme:
   php README.php > README.md
@@ -21,5 +21,5 @@ render-readme-check:
   set -eux
   diff <(php README.php) README.md
 
-install prefix="/usr/local/bin":
-  cp str {{ prefix }}/
+install prefix="/usr/local":
+  cargo install --path . --root {{ prefix }}

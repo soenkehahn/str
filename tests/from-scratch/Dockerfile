@@ -1,7 +1,7 @@
 FROM alpine:3.15
 
 # install str
-RUN apk add just yarn
+RUN apk add just yarn cargo
 ADD . /str/
 WORKDIR /str
 RUN just install
@@ -12,4 +12,4 @@ WORKDIR /user-dir
 RUN yarn install
 RUN yarn add link:/str/typescript-library
 
-ENTRYPOINT ["str"]
+CMD ["str"]

@@ -1,9 +1,11 @@
 [package]
-name = "tests"
+name = "str"
 version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.51"
 cradle = "0.2.0"
+
+[dev-dependencies]
+anyhow = "1.0.51"
 tempfile = "3.2.0"

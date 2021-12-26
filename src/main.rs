@@ -1,3 +1,20 @@
+use cradle::prelude::*;
+
+fn main() {
+    let Status(status) = (
+        "yarn",
+        "ts-node",
+        std::env::args().skip(1).collect::<Vec<_>>(),
+    )
+        .run_output();
+    if !status.success() {
+        match status.code() {
+            Some(code) => std::process::exit(code),
+            None => std::process::exit(1),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use anyhow::anyhow;
@@ -64,7 +81,10 @@ mod tests {
 
         fn run(&self, file: &str) -> Output {
             let (Stderr(stderr), Status(status)) = (
-                self.repo_dir.join("str"),
+                "cargo",
+                "run",
+                "--manifest-path",
+                self.repo_dir.join("Cargo.toml"),
                 file,
                 CurrentDir(self.temp_dir.path()),
             )

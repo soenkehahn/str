@@ -28,6 +28,7 @@ fn integration_test() -> Result<()> {
             "run",
             "--rm",
             image.to_owned(),
+            "str",
             file.to_owned(),
         )
     }

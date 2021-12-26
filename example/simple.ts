@@ -1,5 +1,5 @@
 import { it, assertEq } from "str";
 
-it("fails", () => {
-  assertEq(true, false);
+it("works", () => {
+  assertEq(true, true);
 });
