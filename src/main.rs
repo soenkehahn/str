@@ -1,12 +1,11 @@
 use cradle::prelude::*;
+use std::fs;
 
 fn main() {
-    let Status(status) = (
-        "yarn",
-        "ts-node",
-        std::env::args().skip(1).collect::<Vec<_>>(),
-    )
-        .run_output();
+    let test_files = std::env::args().skip(1).collect::<Vec<_>>();
+    let test_file = test_files.get(0).unwrap(); // fixme
+    let code = fs::read(test_file).expect("fixme");
+    let Status(status) = ("node", "--input-type=module", Stdin(code)).run_output();
     if !status.success() {
         match status.code() {
             Some(code) => std::process::exit(code),
@@ -59,13 +58,10 @@ mod tests {
             run!(
                 "yarn",
                 "add",
-                format!(
-                    "link:{}",
-                    repo_dir
-                        .join("typescript-library")
-                        .to_str()
-                        .ok_or(anyhow!("invalid utf-8"))?
-                ),
+                repo_dir
+                    .join("typescript-library/str-v0.0.0.tgz")
+                    .to_str()
+                    .ok_or(anyhow!("invalid utf-8"))?,
                 CurrentDir(temp_dir.path())
             );
             Ok(Context { temp_dir, repo_dir })

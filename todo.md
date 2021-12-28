@@ -1,0 +1,8 @@
+- **library** switch to swc for bundling? But how will we run the typechecker?
+- use swc to remove types?
+- switch integration tests to ubuntu?
+  - to test on a more common system
+- allow typescript in test-suites
+- Allow multiple tests
+- what happens when no test-files are given?
+- Rename project to something that's easier to google

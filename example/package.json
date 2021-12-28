@@ -2,10 +2,7 @@
   "name": "example",
   "version": "0.0.0",
   "private": true,
-  "devDependencies": {
-    "@types/node": "^17.0.2",
-    "str": "link:../typescript-library",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.5.4"
+  "dependencies": {
+    "str": "../typescript-library/str-v0.0.0.tgz"
   }
 }

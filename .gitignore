@@ -1,2 +1,4 @@
 node_modules/
 /target/
+/typescript-library/dist/
+/typescript-library/str-v*.tgz
