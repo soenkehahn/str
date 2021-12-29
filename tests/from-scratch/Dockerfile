@@ -4,7 +4,7 @@ FROM alpine:3.15
 RUN apk add just yarn cargo bash
 ADD . /str/
 WORKDIR /str
-RUN just bundle-typescript-library
+RUN just typescript-library-bundle
 RUN just install
 
 # create and run user test-suite

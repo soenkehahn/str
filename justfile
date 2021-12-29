@@ -1,12 +1,15 @@
-ci: test run-example clippy render-readme-check integration
+ci: setup test run-example clippy render-readme-check integration
 
-test *args="": bundle-typescript-library
+setup:
+  (cd typescript-library && yarn install)
+
+test *args="": typescript-library-bundle
   (cargo test --bin str -- --test-threads=1 {{ args }})
 
-integration:
+integration: typescript-library-bundle
   (cargo test integration -- --test-threads=1)
 
-run-example: bundle-typescript-library
+run-example: setup typescript-library-bundle
   #!/usr/bin/env bash
   set -eux
   cd example
@@ -27,7 +30,7 @@ render-readme-check:
 install prefix="/usr/local":
   cargo install --path . --root {{ prefix }}
 
-bundle-typescript-library:
+typescript-library-bundle: setup
   #!/usr/bin/env bash
   set -eux
   cd typescript-library

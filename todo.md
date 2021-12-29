@@ -1,4 +1,4 @@
-- **library** switch to swc for bundling? But how will we run the typechecker?
+- switch to dev dependencies for str in tests
 - use swc to remove types?
 - switch integration tests to ubuntu?
   - to test on a more common system
