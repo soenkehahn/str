@@ -11,6 +11,6 @@ RUN just install
 ADD tests/from-scratch/ /user-dir/
 WORKDIR /user-dir
 RUN yarn install
-RUN yarn add /str/typescript-library/str.tgz
+RUN yarn add --dev /str/typescript-library/str.tgz
 
 CMD ["str"]

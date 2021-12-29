@@ -2,7 +2,7 @@
   "name": "example",
   "version": "0.0.0",
   "private": true,
-  "dependencies": {
+  "devDependencies": {
     "str": "../typescript-library/str.tgz"
   }
 }

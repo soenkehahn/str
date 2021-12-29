@@ -1,4 +1,3 @@
-- switch to dev dependencies for str in tests
 - enable strict typescript options
 - use swc to remove types?
 - switch integration tests to ubuntu?

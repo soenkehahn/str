@@ -59,6 +59,7 @@ mod tests {
                 LogCommand,
                 "yarn",
                 "add",
+                "--dev",
                 format!(
                     "link:{}",
                     repo_dir
