@@ -31,10 +31,4 @@ install prefix="/usr/local":
   cargo install --path . --root {{ prefix }}
 
 typescript-library-bundle: setup
-  #!/usr/bin/env bash
-  set -eux
-  cd typescript-library
-  rm -rf dist
-  yarn install
-  yarn tsc
-  yarn pack
+  (cd typescript-library ; make bundle)

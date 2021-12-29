@@ -3,6 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "str": "../typescript-library/str-v0.0.0.tgz"
+    "str": "../typescript-library/str.tgz"
   }
 }

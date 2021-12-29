@@ -54,14 +54,18 @@ mod tests {
                     }
                 "#,
             )?;
-            run!(%"yarn install", CurrentDir(temp_dir.path()));
+            run!(LogCommand, "yarn", "install", CurrentDir(temp_dir.path()));
             run!(
+                LogCommand,
                 "yarn",
                 "add",
-                repo_dir
-                    .join("typescript-library/str-v0.0.0.tgz")
-                    .to_str()
-                    .ok_or(anyhow!("invalid utf-8"))?,
+                format!(
+                    "link:{}",
+                    repo_dir
+                        .join("typescript-library")
+                        .to_str()
+                        .ok_or(anyhow!("invalid utf-8"))?
+                ),
                 CurrentDir(temp_dir.path())
             );
             Ok(Context { temp_dir, repo_dir })
