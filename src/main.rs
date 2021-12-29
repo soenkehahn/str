@@ -108,7 +108,7 @@ mod tests {
             r#"
                 import { assertEq, it } from "str";
                 it("fails", () => {
-                  assertEq(true, false);
+                    assertEq(true, false);
                 });
             "#,
         )?;
@@ -126,7 +126,25 @@ mod tests {
             r#"
                 import { assertEq, it } from "str";
                 it("works", () => {
-                  assertEq(true, true);
+                    assertEq(true, true);
+                });
+            "#,
+        )?;
+        let result = context.run("src/index.test.ts");
+        assert_eq!(result.status.code(), Some(0));
+        Ok(())
+    }
+
+    #[test]
+    fn typescript_gets_compiled_to_javascript() -> Result<()> {
+        let context = Context::new()?;
+        context.write(
+            "src/index.test.ts",
+            r#"
+                import { assertEq, it } from "str";
+                it("works", () => {
+                    let x: boolean =
+                    assertEq(true, x);
                 });
             "#,
         )?;

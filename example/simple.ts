@@ -1,5 +1,6 @@
 import { it, assertEq } from "str";
 
 it("works", () => {
-  assertEq(true, true);
+  let x: boolean = true;
+  assertEq(true, x);
 });
