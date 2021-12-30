@@ -1,16 +1,11 @@
-FROM alpine:3.15
+FROM ubuntu:21.10
 
-# install str
-RUN apk add just yarn cargo bash make
-ADD . /str/
-WORKDIR /str
-RUN just typescript-library-bundle
-RUN just install
-
-# create and run user test-suite
+RUN apt-get update && apt-get install --yes curl yarnpkg make
+RUN ln -s /usr/bin/yarnpkg /usr/local/bin/yarn
 ADD tests/from-scratch/ /user-dir/
 WORKDIR /user-dir
 RUN yarn install
+ADD . /str/
 RUN yarn add --dev /str/typescript-library/str.tgz
 
 CMD ["str"]

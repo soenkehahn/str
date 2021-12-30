@@ -57,7 +57,12 @@ mod tests {
                     }
                 "#,
             )?;
-            run!(LogCommand, "yarn", "install", CurrentDir(temp_dir.path()));
+            run!(
+                LogCommand,
+                "yarn",
+                "install",
+                CurrentDir(temp_dir.path())
+            );
             run!(
                 LogCommand,
                 "yarn",

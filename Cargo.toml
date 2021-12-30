@@ -18,4 +18,5 @@ features = ["tty-emitter"]
 
 [dev-dependencies]
 anyhow = "1.0.51"
+executable-path = "1.0.0"
 tempfile = "3.2.0"

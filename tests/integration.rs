@@ -22,14 +22,17 @@ fn integration_test() -> Result<()> {
     build_command.run_result()?;
     let StdoutTrimmed(image) = (build_command, "--quiet").run_result()?;
     fn run_command(image: &str, file: &str) -> impl Input {
+        let str_executable = executable_path::executable_path("str");
         (
             LogCommand,
-            "podman",
-            "run",
+            ("podman", "run"),
             "--rm",
+            (
+                "-v",
+                format!("{}:/usr/local/bin/str", str_executable.to_string_lossy()),
+            ),
             image.to_owned(),
-            "str",
-            file.to_owned(),
+            ("str", file.to_owned()),
         )
     }
     let (Status(status), Stderr(output)) = run_command(&image, "failing.test.ts").run_result()?;
