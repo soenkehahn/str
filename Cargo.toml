@@ -5,6 +5,16 @@ edition = "2021"
 
 [dependencies]
 cradle = "0.2.0"
+swc = "0.101.0"
+swc_ecma_ast = "0.60.4"
+swc_ecma_parser = "0.82.6"
+swc_ecma_visit = "0.46.0"
+swc_ecma_transforms_typescript = "0.70.0"
+swc_ecma_transforms = "0.104.0"
+
+[dependencies.swc_common]
+version = "0.15.1"
+features = ["tty-emitter"]
 
 [dev-dependencies]
 anyhow = "1.0.51"

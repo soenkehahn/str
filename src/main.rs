@@ -1,10 +1,13 @@
+mod ts_to_js;
+
+use crate::ts_to_js::ts_to_js;
 use cradle::prelude::*;
-use std::fs;
+use std::path::Path;
 
 fn main() {
     let test_files = std::env::args().skip(1).collect::<Vec<_>>();
-    let test_file = test_files.get(0).unwrap(); // fixme
-    let code = fs::read(test_file).expect("fixme");
+    let test_file = test_files.get(0).expect("fixme");
+    let code = ts_to_js(Path::new(test_file));
     let Status(status) = ("node", "--input-type=module", Stdin(code)).run_output();
     if !status.success() {
         match status.code() {
@@ -143,7 +146,7 @@ mod tests {
             r#"
                 import { assertEq, it } from "str";
                 it("works", () => {
-                    let x: boolean =
+                    const x: boolean = true;
                     assertEq(true, x);
                 });
             "#,
