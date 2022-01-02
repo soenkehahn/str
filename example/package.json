@@ -3,6 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "devDependencies": {
-    "str": "../typescript-library/str.tgz"
+    "str": "link:../typescript-library/"
   }
 }

@@ -1,20 +1,13 @@
+mod test_runner;
 mod ts_to_js;
 
-use crate::ts_to_js::ts_to_js;
-use cradle::prelude::*;
+use crate::test_runner::TestRunner;
 use std::path::Path;
 
 fn main() {
     let test_files = std::env::args().skip(1).collect::<Vec<_>>();
     let test_file = test_files.get(0).expect("fixme");
-    let code = ts_to_js(Path::new(test_file));
-    let Status(status) = ("node", "--input-type=module", Stdin(code)).run_output();
-    if !status.success() {
-        match status.code() {
-            Some(code) => std::process::exit(code),
-            None => std::process::exit(1),
-        }
-    }
+    TestRunner::new().run_test_file(Path::new(test_file));
 }
 
 #[cfg(test)]
@@ -28,15 +21,6 @@ mod tests {
     use std::path::PathBuf;
     use std::process::ExitStatus;
     use tempfile::TempDir;
-
-    fn assert_contains<A: AsRef<str>, B: AsRef<str>>(a: A, b: B) {
-        assert!(
-            a.as_ref().contains(b.as_ref()),
-            "\nassert_contains(\n  {:?},\n  {:?}\n)\n",
-            a.as_ref(),
-            b.as_ref()
-        );
-    }
 
     struct Context {
         repo_dir: PathBuf,
@@ -57,14 +41,12 @@ mod tests {
                     }
                 "#,
             )?;
-            run!(
-                LogCommand,
-                "yarn",
-                "install",
-                CurrentDir(temp_dir.path())
-            );
-            run!(
-                LogCommand,
+            let context = Context {
+                temp_dir,
+                repo_dir: repo_dir.clone(),
+            };
+            let () = context.run_command(("yarn", "install"));
+            let () = context.run_command((
                 "yarn",
                 "add",
                 "--dev",
@@ -75,9 +57,8 @@ mod tests {
                         .to_str()
                         .ok_or(anyhow!("invalid utf-8"))?
                 ),
-                CurrentDir(temp_dir.path())
-            );
-            Ok(Context { temp_dir, repo_dir })
+            ));
+            Ok(context)
         }
 
         fn write<P: AsRef<Path>>(&self, path: P, content: &str) -> Result<()> {
@@ -89,17 +70,22 @@ mod tests {
         }
 
         fn run(&self, file: &str) -> Output {
-            let (Stderr(stderr), Status(status)) = (
+            let (Stderr(stderr), Status(status)) = self.run_command((
                 "cargo",
                 "run",
+                "--quiet",
                 "--manifest-path",
                 self.repo_dir.join("Cargo.toml"),
                 file,
-                CurrentDir(self.temp_dir.path()),
-            )
-                .run_output();
+            ));
             eprintln!("STDERR:\n{}", stderr);
             Output { status, stderr }
+        }
+
+        fn run_command<I: Input, O: cradle::Output>(&self, i: I) -> O {
+            let (StdoutUntrimmed(stdout), o) = (CurrentDir(self.temp_dir.path()), i).run_output();
+            println!("{}", stdout);
+            o
         }
     }
 
@@ -122,7 +108,7 @@ mod tests {
         )?;
         let result = context.run("src/index.test.ts");
         assert_eq!(result.status.code(), Some(1));
-        assert_contains(result.stderr, "true\n    !==\nfalse".to_string());
+        assert_eq!(result.stderr, "true\n    !==\nfalse\n".to_string());
         Ok(())
     }
 
@@ -157,6 +143,122 @@ mod tests {
             "#,
         )?;
         let result = context.run("src/index.test.ts");
+        assert_eq!(result.status.code(), Some(0));
+        Ok(())
+    }
+
+    #[test]
+    fn multiple_succeeding_tests() -> Result<()> {
+        let context = Context::new()?;
+        context.write(
+            "src/index.test.ts",
+            r#"
+                import { assertEq, it } from "str";
+
+                it("works", () => {
+                    assertEq(true, true);
+                });
+
+                it("works too", () => {
+                    assertEq(true, true);
+                });
+            "#,
+        )?;
+        let result = context.run("src/index.test.ts");
+        assert_eq!(result.status.code(), Some(0));
+        Ok(())
+    }
+
+    #[test]
+    fn multiple_tests_last_failing() -> Result<()> {
+        let context = Context::new()?;
+        context.write(
+            "src/index.test.ts",
+            r#"
+                import { assertEq, it } from "str";
+
+                it("works", () => {
+                    assertEq(true, true);
+                });
+
+                it("fails", () => {
+                    assertEq(true, false);
+                });
+            "#,
+        )?;
+        let result = context.run("src/index.test.ts");
+        assert_eq!(result.status.code(), Some(1));
+        assert_eq!(result.stderr, "true\n    !==\nfalse\n".to_string());
+        Ok(())
+    }
+
+    #[test]
+    fn multiple_tests_first_failing() -> Result<()> {
+        let context = Context::new()?;
+        context.write(
+            "src/index.test.ts",
+            r#"
+                import { assertEq, it } from "str";
+
+                it("fails", () => {
+                    assertEq(true, false);
+                });
+
+                it("works", () => {
+                    assertEq(true, true);
+                });
+            "#,
+        )?;
+        let result = context.run("src/index.test.ts");
+        assert_eq!(result.status.code(), Some(1));
+        assert_eq!(result.stderr, "true\n    !==\nfalse\n".to_string());
+        Ok(())
+    }
+
+    #[test]
+    fn multiple_failing_tests() -> Result<()> {
+        let context = Context::new()?;
+        context.write(
+            "src/index.test.ts",
+            r#"
+                import { assertEq, it } from "str";
+
+                it("fails", () => {
+                    assertEq(true, false);
+                });
+
+                it("fails too", () => {
+                    assertEq(true, false);
+                });
+            "#,
+        )?;
+        let result = context.run("src/index.test.ts");
+        assert_eq!(result.status.code(), Some(1));
+        assert_eq!(
+            result.stderr,
+            "true\n    !==\nfalse\ntrue\n    !==\nfalse\n".to_string()
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn test_modules_have_same_base_names() -> Result<()> {
+        let context = Context::new()?;
+        context.write(
+            "src/foo.ts",
+            r#"
+                import { assertEq, it } from "str";
+                import { fileURLToPath } from 'url'
+                import { basename, dirname, extname } from 'path'
+
+                it("has the basename foo", () => {
+                    let path = fileURLToPath(import.meta.url);
+                    const filename = basename(path, extname(path));
+                    assertEq("foo", filename);
+                });
+            "#,
+        )?;
+        let result = context.run("src/foo.ts");
         assert_eq!(result.status.code(), Some(0));
         Ok(())
     }
