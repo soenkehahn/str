@@ -1,6 +1,7 @@
 use crate::ts_to_js::ts_to_js;
 use cradle::prelude::*;
 use std::fs;
+use std::os::unix;
 use std::path::Path;
 use std::process::ExitStatus;
 use tempfile::TempDir;
@@ -17,14 +18,11 @@ impl TestRunner {
     }
 
     pub fn run_test_file(&self, test_file: &Path) -> ! {
-        // fixme: don't use cradle for linking
-        (
-            "ln",
-            "-s",
+        unix::fs::symlink(
             std::env::current_dir().expect("fixme").join("node_modules"),
             self.temp_dir.path().join("node_modules"),
         )
-            .run();
+        .expect("fixme");
         let status = self.run_as_module(test_file);
         if status.success() {
             std::process::exit(0);

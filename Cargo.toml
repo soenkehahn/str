@@ -4,7 +4,7 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-cradle = "0.2.0"
+cradle = "0.2.1"
 swc = "0.101.0"
 swc_ecma_ast = "0.60.4"
 swc_ecma_parser = "0.82.6"
