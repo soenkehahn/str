@@ -4,21 +4,21 @@ version = "0.0.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.51"
-cradle = "0.2.1"
-swc = "0.101.0"
-swc_ecma_ast = "0.60.4"
-swc_ecma_parser = "0.82.6"
-swc_ecma_visit = "0.46.0"
-swc_ecma_transforms_typescript = "0.70.0"
-swc_ecma_transforms = "0.104.0"
-tempfile = "3.2.0"
+anyhow = "*"
+cradle = "*"
+swc = "*"
+swc_ecma_ast = "*"
+swc_ecma_parser = "*"
+swc_ecma_visit = "*"
+swc_ecma_transforms_typescript = "*"
+swc_ecma_transforms = "*"
+tempfile = "*"
 
 [dependencies.swc_common]
-version = "0.15.1"
+version = "*"
 features = ["tty-emitter"]
 
 [dev-dependencies]
-executable-path = "1.0.0"
-pretty_assertions = "1.0.0"
-unindent = "0.1.7"
+executable-path = "*"
+pretty_assertions = "*"
+unindent = "*"
