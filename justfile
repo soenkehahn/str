@@ -4,10 +4,10 @@ setup:
   (cd typescript-library && yarn install)
 
 test *args="": typescript-library-bundle
-  (cargo test --bin str -- --test-threads=20 {{ args }})
+  (cargo test --test unit -- --test-threads=20 {{ args }})
 
 integration: typescript-library-bundle
-  (cargo test integration -- --test-threads=1)
+  (cargo test --test integration -- --test-threads=1)
 
 run-example: setup typescript-library-bundle
   #!/usr/bin/env bash
