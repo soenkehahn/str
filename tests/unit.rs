@@ -63,11 +63,11 @@ fn simple_test_failure() -> Result<()> {
     context.write(
         "src/index.test.ts",
         r#"
-                import { assertEq, it } from "str";
-                it("fails", () => {
-                    assertEq(true, false);
-                });
-            "#,
+            import { assertEq, it } from "str";
+            it("fails", () => {
+                assertEq(true, false);
+            });
+        "#,
     )?;
     let result = context.run("src/index.test.ts");
     assert_eq!(result.status.code(), Some(1));
@@ -81,11 +81,11 @@ fn simple_test_success() -> Result<()> {
     context.write(
         "src/index.test.ts",
         r#"
-                import { assertEq, it } from "str";
-                it("works", () => {
-                    assertEq(true, true);
-                });
-            "#,
+            import { assertEq, it } from "str";
+            it("works", () => {
+                assertEq(true, true);
+            });
+        "#,
     )?;
     let result = context.run("src/index.test.ts");
     assert_eq!(result.status.code(), Some(0));
@@ -98,12 +98,12 @@ fn typescript_gets_compiled_to_javascript() -> Result<()> {
     context.write(
         "src/index.test.ts",
         r#"
-                import { assertEq, it } from "str";
-                it("works", () => {
-                    const x: boolean = true;
-                    assertEq(true, x);
-                });
-            "#,
+            import { assertEq, it } from "str";
+            it("works", () => {
+                const x: boolean = true;
+                assertEq(true, x);
+            });
+        "#,
     )?;
     let result = context.run("src/index.test.ts");
     assert_eq!(result.status.code(), Some(0));
@@ -116,16 +116,16 @@ fn multiple_succeeding_tests() -> Result<()> {
     context.write(
         "src/index.test.ts",
         r#"
-                import { assertEq, it } from "str";
+            import { assertEq, it } from "str";
 
-                it("works", () => {
-                    assertEq(true, true);
-                });
+            it("works", () => {
+                assertEq(true, true);
+            });
 
-                it("works too", () => {
-                    assertEq(true, true);
-                });
-            "#,
+            it("works too", () => {
+                assertEq(true, true);
+            });
+        "#,
     )?;
     let result = context.run("src/index.test.ts");
     assert_eq!(result.status.code(), Some(0));
@@ -138,16 +138,16 @@ fn multiple_tests_last_failing() -> Result<()> {
     context.write(
         "src/index.test.ts",
         r#"
-                import { assertEq, it } from "str";
+            import { assertEq, it } from "str";
 
-                it("works", () => {
-                    assertEq(true, true);
-                });
+            it("works", () => {
+                assertEq(true, true);
+            });
 
-                it("fails", () => {
-                    assertEq(true, false);
-                });
-            "#,
+            it("fails", () => {
+                assertEq(true, false);
+            });
+        "#,
     )?;
     let result = context.run("src/index.test.ts");
     assert_eq!(result.status.code(), Some(1));
@@ -161,16 +161,16 @@ fn multiple_tests_first_failing() -> Result<()> {
     context.write(
         "src/index.test.ts",
         r#"
-                import { assertEq, it } from "str";
+            import { assertEq, it } from "str";
 
-                it("fails", () => {
-                    assertEq(true, false);
-                });
+            it("fails", () => {
+                assertEq(true, false);
+            });
 
-                it("works", () => {
-                    assertEq(true, true);
-                });
-            "#,
+            it("works", () => {
+                assertEq(true, true);
+            });
+        "#,
     )?;
     let result = context.run("src/index.test.ts");
     assert_eq!(result.status.code(), Some(1));
@@ -184,16 +184,16 @@ fn multiple_failing_tests() -> Result<()> {
     context.write(
         "src/index.test.ts",
         r#"
-                import { assertEq, it } from "str";
+            import { assertEq, it } from "str";
 
-                it("fails", () => {
-                    assertEq(true, false);
-                });
+            it("fails", () => {
+                assertEq(true, false);
+            });
 
-                it("fails too", () => {
-                    assertEq(true, false);
-                });
-            "#,
+            it("fails too", () => {
+                assertEq(true, false);
+            });
+        "#,
     )?;
     let result = context.run("src/index.test.ts");
     assert_eq!(result.status.code(), Some(1));
@@ -210,16 +210,16 @@ fn test_modules_have_same_base_names() -> Result<()> {
     context.write(
         "src/foo.ts",
         r#"
-                import { assertEq, it } from "str";
-                import { fileURLToPath } from 'url'
-                import { basename, dirname, extname } from 'path'
+            import { assertEq, it } from "str";
+            import { fileURLToPath } from 'url'
+            import { basename, dirname, extname } from 'path'
 
-                it("has the basename foo", () => {
-                    let path = fileURLToPath(import.meta.url);
-                    const filename = basename(path, extname(path));
-                    assertEq("foo", filename);
-                });
-            "#,
+            it("has the basename foo", () => {
+                let path = fileURLToPath(import.meta.url);
+                const filename = basename(path, extname(path));
+                assertEq("foo", filename);
+            });
+        "#,
     )?;
     let result = context.run("src/foo.ts");
     assert_eq!(result.status.code(), Some(0));
