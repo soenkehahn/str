@@ -1,6 +1,8 @@
+- Catch exceptions during tests
+- Nice colors in output
+- Allow to typecheck with tsc against library
+- Show statistics of failing and passing tests at the end
 - Put better error handling in place
-- Include test names in output
-- Include test files in output
 - Allow test-suites in nested directories
 - Better error message when `str` library can't be found
 - Allow multiple test-suite files

@@ -21,7 +21,7 @@ run-example: setup typescript-library-bundle
   set -eux
   cd example
   yarn install
-  cargo run simple.ts || true
+  cargo run -- simple.ts || true
 
 clippy:
   cargo clippy --tests

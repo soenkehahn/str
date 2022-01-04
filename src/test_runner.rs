@@ -43,19 +43,24 @@ impl TestRunner {
         let Status(status) = (
             "node",
             "--input-type=module",
-            Stdin(TestRunner::runner_code(&js_file)),
+            Stdin(TestRunner::runner_code(test_file, &js_file)),
         )
             .run_output();
         status
     }
 
-    fn runner_code(test_js_file: &Path) -> String {
+    fn runner_code(original_file: &Path, test_js_file: &Path) -> String {
         format!(
             "
-            import \"{}\";
-            import {{ finalize }} from \"str\";
-            finalize();
-        ",
+                import {{ _strTestRunner }} from \"str\";
+                async function main() {{
+                    _strTestRunner.setTestFile(\"{}\");
+                    await import(\"{}\");
+                    _strTestRunner.finalize();
+                }}
+                main();
+            ",
+            &original_file.to_str().unwrap(),
             &test_js_file.to_str().unwrap()
         )
     }

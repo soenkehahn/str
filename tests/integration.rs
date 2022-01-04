@@ -1,14 +1,7 @@
 use anyhow::Result;
 use cradle::prelude::*;
-
-fn assert_contains<A: AsRef<str>, B: AsRef<str>>(a: A, b: B) {
-    assert!(
-        a.as_ref().contains(b.as_ref()),
-        "\nassert_contains(\n  {:?},\n  {:?}\n)\n",
-        a.as_ref(),
-        b.as_ref()
-    );
-}
+use pretty_assertions::assert_eq;
+use unindent::Unindent;
 
 #[test]
 fn integration_test() -> Result<()> {
@@ -37,9 +30,26 @@ fn integration_test() -> Result<()> {
     }
     let (Status(status), Stderr(output)) = run_command(&image, "failing.test.ts").run_result()?;
     assert_eq!(status.code(), Some(1));
-    assert_contains(output, "true\n    !==\nfalse");
+    assert_eq!(
+        output,
+        "
+            failing.test.ts -> fails ...
+            true
+                !==
+            false
+            failing.test.ts -> fails FAILED
+        "
+        .unindent()
+    );
     let (Status(status), Stderr(output)) = run_command(&image, "passing.test.ts").run_result()?;
     assert!(status.success());
-    assert_eq!(output, "");
+    assert_eq!(
+        output,
+        "
+            passing.test.ts -> passes ...
+            passing.test.ts -> passes PASSED
+        "
+        .unindent()
+    );
     Ok(())
 }

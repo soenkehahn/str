@@ -1,12 +1,14 @@
 use anyhow::anyhow;
 use anyhow::Result;
 use cradle::prelude::*;
+use pretty_assertions::assert_eq;
 use std::fs;
 use std::fs::create_dir_all;
 use std::os::unix;
 use std::path::Path;
 use std::process::ExitStatus;
 use tempfile::TempDir;
+use unindent::Unindent;
 
 struct Context {
     temp_dir: TempDir,
@@ -50,6 +52,12 @@ impl Context {
         print!("{}", stdout);
         o
     }
+
+    fn run_assert(&self, file: &str, expected_exit_code: i32, expected_stderr: &str) {
+        let output = self.run(file);
+        assert_eq!(output.stderr, expected_stderr.unindent());
+        assert_eq!(output.status.code(), Some(expected_exit_code));
+    }
 }
 
 struct Output {
@@ -69,9 +77,17 @@ fn simple_test_failure() -> Result<()> {
             });
         "#,
     )?;
-    let result = context.run("src/index.test.ts");
-    assert_eq!(result.status.code(), Some(1));
-    assert_eq!(result.stderr, "true\n    !==\nfalse\n".to_string());
+    context.run_assert(
+        "src/index.test.ts",
+        1,
+        "
+            src/index.test.ts -> fails ...
+            true
+                !==
+            false
+            src/index.test.ts -> fails FAILED
+        ",
+    );
     Ok(())
 }
 
@@ -87,8 +103,14 @@ fn simple_test_success() -> Result<()> {
             });
         "#,
     )?;
-    let result = context.run("src/index.test.ts");
-    assert_eq!(result.status.code(), Some(0));
+    context.run_assert(
+        "src/index.test.ts",
+        0,
+        "
+            src/index.test.ts -> works ...
+            src/index.test.ts -> works PASSED
+        ",
+    );
     Ok(())
 }
 
@@ -105,13 +127,19 @@ fn typescript_gets_compiled_to_javascript() -> Result<()> {
             });
         "#,
     )?;
-    let result = context.run("src/index.test.ts");
-    assert_eq!(result.status.code(), Some(0));
+    context.run_assert(
+        "src/index.test.ts",
+        0,
+        "
+            src/index.test.ts -> works ...
+            src/index.test.ts -> works PASSED
+        ",
+    );
     Ok(())
 }
 
 #[test]
-fn multiple_succeeding_tests() -> Result<()> {
+fn multiple_tests_passing() -> Result<()> {
     let context = Context::new()?;
     context.write(
         "src/index.test.ts",
@@ -127,8 +155,16 @@ fn multiple_succeeding_tests() -> Result<()> {
             });
         "#,
     )?;
-    let result = context.run("src/index.test.ts");
-    assert_eq!(result.status.code(), Some(0));
+    context.run_assert(
+        "src/index.test.ts",
+        0,
+        "
+            src/index.test.ts -> works ...
+            src/index.test.ts -> works PASSED
+            src/index.test.ts -> works too ...
+            src/index.test.ts -> works too PASSED
+        ",
+    );
     Ok(())
 }
 
@@ -149,9 +185,19 @@ fn multiple_tests_last_failing() -> Result<()> {
             });
         "#,
     )?;
-    let result = context.run("src/index.test.ts");
-    assert_eq!(result.status.code(), Some(1));
-    assert_eq!(result.stderr, "true\n    !==\nfalse\n".to_string());
+    context.run_assert(
+        "src/index.test.ts",
+        1,
+        "
+            src/index.test.ts -> works ...
+            src/index.test.ts -> works PASSED
+            src/index.test.ts -> fails ...
+            true
+                !==
+            false
+            src/index.test.ts -> fails FAILED
+        ",
+    );
     Ok(())
 }
 
@@ -172,9 +218,19 @@ fn multiple_tests_first_failing() -> Result<()> {
             });
         "#,
     )?;
-    let result = context.run("src/index.test.ts");
-    assert_eq!(result.status.code(), Some(1));
-    assert_eq!(result.stderr, "true\n    !==\nfalse\n".to_string());
+    context.run_assert(
+        "src/index.test.ts",
+        1,
+        "
+            src/index.test.ts -> fails ...
+            true
+                !==
+            false
+            src/index.test.ts -> fails FAILED
+            src/index.test.ts -> works ...
+            src/index.test.ts -> works PASSED
+        ",
+    );
     Ok(())
 }
 
@@ -195,11 +251,21 @@ fn multiple_failing_tests() -> Result<()> {
             });
         "#,
     )?;
-    let result = context.run("src/index.test.ts");
-    assert_eq!(result.status.code(), Some(1));
-    assert_eq!(
-        result.stderr,
-        "true\n    !==\nfalse\ntrue\n    !==\nfalse\n".to_string()
+    context.run_assert(
+        "src/index.test.ts",
+        1,
+        "
+            src/index.test.ts -> fails ...
+            true
+                !==
+            false
+            src/index.test.ts -> fails FAILED
+            src/index.test.ts -> fails too ...
+            true
+                !==
+            false
+            src/index.test.ts -> fails too FAILED
+        ",
     );
     Ok(())
 }
