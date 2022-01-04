@@ -4,5 +4,8 @@
   "private": true,
   "devDependencies": {
     "str": "link:/home/shahn/playground/suckless-test-runner/typescript-library"
+  },
+  "dependencies": {
+    "react": "^17.0.2"
   }
 }

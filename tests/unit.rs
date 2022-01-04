@@ -291,3 +291,28 @@ fn test_modules_have_same_base_names() -> Result<()> {
     assert_eq!(result.status.code(), Some(0));
     Ok(())
 }
+
+#[test]
+fn supports_jsx() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "src/index.test.ts",
+        r#"
+            import { assertEq, it } from "str";
+            import * as React from "react";
+            it("works", () => {
+                const App = () => <div> foo </div>;
+                const app = <App />;
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "src/index.test.ts",
+        0,
+        "
+            src/index.test.ts -> works ...
+            src/index.test.ts -> works PASSED
+        ",
+    );
+    Ok(())
+}
