@@ -1,3 +1,4 @@
+- support jsx
 - Catch exceptions during tests
 - Show statistics of failing and passing tests at the end
 - Nice colors in output
@@ -5,13 +6,11 @@
 - Implement `describe`
 - dry-run
 - Allow to typecheck with tsc against library
-- Put better rust error handling in place
 - Better error message when `str` library can't be found
 - Allow multiple test-suite files
 - Allow to use dependencies in test-suites
   - local ones
   - from npm
-- Remove fixmes and todos
 - are other swc transforms needed?
   - https://github.com/swc-project/swc/blob/333acb56223139817c1df0c8b3763190b55a6295/crates/swc_ecma_transforms_typescript/examples/ts_to_js.rs#L67..L76
 - what happens when no test-files are given?

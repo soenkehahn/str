@@ -1,3 +1,4 @@
+use anyhow::Result;
 use std::path::Path;
 use swc::config::util::BoolOrObject;
 use swc::config::IsModule;
@@ -11,30 +12,28 @@ use swc_common::GLOBALS;
 use swc_ecma_ast::EsVersion;
 use swc_ecma_parser::Syntax;
 
-pub fn ts_to_js(test_file: &Path) -> String {
+pub fn ts_to_js(test_file: &Path) -> Result<String> {
     let spans: Lrc<SourceMap> = Default::default();
     let handler = Handler::with_tty_emitter(ColorConfig::Auto, true, false, Some(spans.clone()));
-    let file = spans.load_file(test_file).expect("failed to load file");
+    let file = spans.load_file(test_file)?;
     let compiler = swc::Compiler::new(spans);
-    GLOBALS.set(compiler.globals(), || -> String {
+    GLOBALS.set(compiler.globals(), || -> Result<String> {
         let syntax = EsVersion::Es2015;
-        let program = compiler
-            .parse_js(
-                file,
-                &handler,
-                syntax,
-                Syntax::Typescript(Default::default()),
-                IsModule::Bool(true),
-                true,
-            )
-            .expect("fixme");
+        let program = compiler.parse_js(
+            file,
+            &handler,
+            syntax,
+            Syntax::Typescript(Default::default()),
+            IsModule::Bool(true),
+            true,
+        )?;
         let program = compiler.transform(
             &handler,
             program,
             false,
             swc_ecma_transforms_typescript::strip::strip(Mark::fresh(Mark::root())),
         );
-        compiler
+        Ok(compiler
             .print(
                 &program,
                 Some(test_file.to_string_lossy().as_ref()),
@@ -46,8 +45,7 @@ pub fn ts_to_js(test_file: &Path) -> String {
                 None,
                 false,
                 Some(BoolOrObject::Bool(true)),
-            )
-            .expect("fixme")
-            .code
+            )?
+            .code)
     })
 }
