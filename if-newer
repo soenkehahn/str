@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+
+import fileinput
+import os
+import subprocess
+import sys
+
+program = sys.argv[0]
+
+if len(sys.argv) < 4:
+    print(f"Usage: {program} input-path output-path command ...")
+    sys.exit(1)
+
+input = sys.argv[1]
+if input == "-":
+    inputPaths = []
+    for file in sys.stdin:
+        inputPaths.append(file.strip())
+else:
+    inputPaths = [input]
+outputPath = sys.argv[2]
+command = sys.argv[3:]
+
+
+def runCommand():
+    subprocess.run(command)
+
+
+inputPathModified = 0
+for inputPath in inputPaths:
+    try:
+        mtime = os.path.getmtime(inputPath)
+    except FileNotFoundError:
+        print(f"{inputPaths} doesn't exist", file=sys.stderr)
+        sys.exit(1)
+    if mtime > inputPathModified:
+        inputPathModified = mtime
+
+try:
+    outputPathModified = os.path.getmtime(outputPath)
+    if inputPathModified > outputPathModified:
+        print(f"{inputPaths} newer than {outputPath}", file=sys.stderr)
+        runCommand()
+    else:
+        print(f"nothing to do, {inputPaths} older than {outputPath}", file=sys.stderr)
+except FileNotFoundError:
+    runCommand()

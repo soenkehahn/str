@@ -1,4 +1,3 @@
-- Run tests without network, at least most of the time
 - Put better error handling in place
 - Include test names in output
 - Include test files in output

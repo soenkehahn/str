@@ -3,6 +3,7 @@ use anyhow::Result;
 use cradle::prelude::*;
 use std::fs;
 use std::fs::create_dir_all;
+use std::os::unix;
 use std::path::Path;
 use std::process::ExitStatus;
 use tempfile::TempDir;
@@ -15,31 +16,18 @@ impl Context {
     fn new() -> Result<Self> {
         let repo_dir = std::env::current_dir()?;
         let temp_dir = TempDir::new()?;
-        fs::write(
-            temp_dir.path().join("package.json"),
-            r#"
-                {
-                    "name": "str-test",
-                    "version": "0.0.0",
-                    "private": true
-                }
-            "#,
-        )?;
-        let context = Context { temp_dir };
-        let () = context.run_command(("yarn", "install"));
-        let () = context.run_command((
-            "yarn",
-            "add",
-            "--dev",
-            format!(
-                "link:{}",
-                repo_dir
-                    .join("typescript-library")
-                    .to_str()
-                    .ok_or(anyhow!("invalid utf-8"))?
-            ),
-        ));
-        Ok(context)
+        ("mkdir", temp_dir.path().join("node_modules/")).run();
+        for dependency in fs::read_dir(repo_dir.join("tests/test-project/node_modules"))? {
+            let dependency = dependency?.path();
+            unix::fs::symlink(
+                &dependency,
+                temp_dir
+                    .path()
+                    .join("node_modules/")
+                    .join(dependency.file_name().unwrap()),
+            )?;
+        }
+        Ok(Context { temp_dir })
     }
 
     fn write<P: AsRef<Path>>(&self, path: P, content: &str) -> Result<()> {
@@ -53,13 +41,13 @@ impl Context {
     fn run(&self, file: &str) -> Output {
         let (Stderr(stderr), Status(status)) =
             self.run_command((executable_path::executable_path("str"), file));
-        eprintln!("STDERR:\n{}", stderr);
+        eprintln!("STDERR:\n{}STDERR END", stderr);
         Output { status, stderr }
     }
 
     fn run_command<I: Input, O: cradle::Output>(&self, i: I) -> O {
         let (StdoutUntrimmed(stdout), o) = (CurrentDir(self.temp_dir.path()), i).run_output();
-        println!("{}", stdout);
+        print!("{}", stdout);
         o
     }
 }

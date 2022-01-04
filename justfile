@@ -1,10 +1,17 @@
 ci: setup test run-example clippy render-readme-check integration
 
 setup:
-  (cd typescript-library && yarn install)
+  #!/usr/bin/env bash
+  set -eu
+  cd typescript-library
+  ../if-newer package.json node_modules/.touch yarn install
+  touch node_modules/.touch
+  cd ../tests/test-project
+  ../../if-newer package.json node_modules/.touch yarn install
+  touch node_modules/.touch
 
 test *args="": typescript-library-bundle
-  (cargo test --test unit -- --test-threads=20 {{ args }})
+  (cargo test --test unit -- {{ args }})
 
 integration: typescript-library-bundle
   (cargo test --test integration -- --test-threads=1)
@@ -31,4 +38,8 @@ install prefix="/usr/local":
   cargo install --path . --root {{ prefix }}
 
 typescript-library-bundle: setup
-  (cd typescript-library ; make bundle)
+  #!/usr/bin/env bash
+  set -eu
+  cd typescript-library
+  ls *.ts tsconfig.json | ../if-newer - dist/index.js yarn tsc
+  ../if-newer dist/index.js str.tgz yarn pack --filename str.tgz
