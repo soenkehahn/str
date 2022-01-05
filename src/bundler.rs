@@ -25,7 +25,7 @@ use swc_ecma_visit::VisitMutWith;
 
 pub struct Imports {
     queue: VecDeque<Result<PathBuf>>,
-    current_dir: PathBuf,
+    current_file: PathBuf,
 }
 
 impl Imports {
@@ -45,13 +45,6 @@ impl Imports {
         Self::get_output_file(output_dir, main_file)
     }
 
-    fn file_parent(file: &Path) -> Result<PathBuf> {
-        Ok(file
-            .parent()
-            .ok_or(anyhow!("source code file has no parent"))?
-            .to_owned())
-    }
-
     fn get_output_file(output_dir: &Path, file: &Path) -> Result<PathBuf> {
         Ok(output_dir.join(file).with_extension("mjs"))
     }
@@ -59,8 +52,16 @@ impl Imports {
     fn new(current_file: &Path) -> Result<Self> {
         Ok(Self {
             queue: VecDeque::new(),
-            current_dir: Self::file_parent(current_file)?,
+            current_file: current_file.to_owned(),
         })
+    }
+
+    fn current_dir(&self) -> Result<PathBuf> {
+        Ok(self
+            .current_file
+            .parent()
+            .ok_or(anyhow!("source code file has no parent"))?
+            .to_owned())
     }
 
     fn convert_to_js(&mut self, path: &Path) -> Result<String> {
@@ -121,23 +122,33 @@ impl Imports {
         self.queue.pop_front().transpose()
     }
 
-    fn resolve_local_import(&self, import_string: &str) -> ImportedFile {
+    fn resolve_import(&self, import_string: &str) -> ImportedFile {
         if import_string.starts_with("./") {
-            let module_extensions = vec!["ts", "tsx"];
-            let candidates = module_extensions.into_iter().map(|extension| {
-                self.current_dir
-                    .join(PathBuf::from(format!("{}.{}", import_string, extension)))
-                    .lexiclean()
-            });
-            for candidate in candidates {
-                if candidate.exists() {
-                    return ImportedFile::LocalFile(Ok(candidate));
-                }
-            }
-            ImportedFile::LocalFile(Err(anyhow!("cannot find module \"{}\"", import_string)))
+            ImportedFile::LocalFile(self.resolve_local_import(import_string))
         } else {
             ImportedFile::NonLocalFile
         }
+    }
+
+    fn resolve_local_import(&self, import_string: &str) -> Result<PathBuf> {
+        let module_extensions = vec!["ts", "tsx"];
+        for module_extension in module_extensions {
+            let candidate = self
+                .current_dir()?
+                .join(PathBuf::from(format!(
+                    "{}.{}",
+                    import_string, module_extension
+                )))
+                .lexiclean();
+            if candidate.exists() {
+                return Ok(candidate);
+            }
+        }
+        Err(anyhow!(
+            "cannot find module \"{}\" (imported from {})",
+            import_string,
+            self.current_file.to_string_lossy()
+        ))
     }
 }
 
@@ -149,7 +160,7 @@ enum ImportedFile {
 impl VisitMut for Imports {
     fn visit_mut_import_decl(&mut self, import_decl: &mut ImportDecl) {
         let import_string: &str = import_decl.src.value.as_ref();
-        match self.resolve_local_import(import_string) {
+        match self.resolve_import(import_string) {
             ImportedFile::LocalFile(dependency_file) => {
                 self.queue.push_front(dependency_file);
             }
