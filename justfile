@@ -11,20 +11,20 @@ setup:
   touch node_modules/.touch
 
 test *args="": typescript-library-bundle
-  (cargo test --test unit -- {{ args }})
+  (cargo ltest --test unit -- {{ args }})
 
 integration: typescript-library-bundle
-  (cargo test --test integration -- --test-threads=1)
+  (cargo ltest --test integration -- --test-threads=1)
 
 run-example: setup typescript-library-bundle
   #!/usr/bin/env bash
   set -eux
   cd example
   yarn install
-  cargo run -- simple.ts || true
+  cargo lrun -- simple.ts || true
 
 clippy:
-  cargo clippy --tests
+  cargo lclippy --tests
 
 render-readme:
   php README.php > README.md
