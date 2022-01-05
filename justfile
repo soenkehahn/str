@@ -9,6 +9,9 @@ setup:
   cd ../tests/test-project
   ../../if-newer package.json node_modules/.touch yarn install
   touch node_modules/.touch
+  cd ../../example
+  ../if-newer package.json node_modules/.touch yarn install
+  touch node_modules/.touch
 
 test *args="": typescript-library-bundle
   (cargo ltest --test unit -- {{ args }})
@@ -17,11 +20,7 @@ integration: typescript-library-bundle
   (cargo ltest --test integration -- --test-threads=1)
 
 run-example: setup typescript-library-bundle
-  #!/usr/bin/env bash
-  set -eux
-  cd example
-  yarn install
-  cargo lrun -- simple.ts || true
+  (cd example && cargo lrun -- simple.ts || true)
 
 clippy:
   cargo lclippy --tests
