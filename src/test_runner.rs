@@ -1,8 +1,7 @@
-use crate::ts_to_js::ts_to_js;
+use crate::bundler::Imports;
 use anyhow::anyhow;
 use anyhow::Result;
 use cradle::prelude::*;
-use std::fs;
 use std::os::unix;
 use std::path::Path;
 use std::process::ExitStatus;
@@ -36,17 +35,10 @@ impl TestRunner {
     }
 
     fn run_as_module(&self, test_file: &Path) -> Result<ExitStatus> {
-        let js_file = self.temp_dir.path().join(format!(
-            "{}.mjs",
-            test_file
-                .file_stem()
-                .ok_or_else(|| anyhow!("no file stem: {:?}", test_file))?
-                .to_str()
-                .ok_or_else(|| anyhow!("cannot convert to string: {:?}", test_file))?
-        ));
-        fs::write(&js_file, ts_to_js(test_file)?)?;
+        let js_file = Imports::run(test_file, self.temp_dir.path())?;
         let Status(status) = (
             "node",
+            "--experimental-specifier-resolution=node",
             "--input-type=module",
             Stdin(TestRunner::runner_code(test_file, &js_file)?),
         )

@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 anyhow = "*"
 cradle = "*"
+lexiclean = "*"
 swc = "*"
 swc_ecma_ast = "*"
 swc_ecma_parser = "*"

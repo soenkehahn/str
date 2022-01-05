@@ -293,7 +293,7 @@ fn test_modules_have_same_base_names() -> Result<()> {
 }
 
 #[test]
-fn supports_jsx() -> Result<()> {
+fn jsx() -> Result<()> {
     let context = Context::new()?;
     context.write(
         "src/index.test.ts",
@@ -312,6 +312,70 @@ fn supports_jsx() -> Result<()> {
         "
             src/index.test.ts -> works ...
             src/index.test.ts -> works PASSED
+        ",
+    );
+    Ok(())
+}
+
+#[test]
+fn local_imports() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { assertEq, it } from "str";
+            import { foo } from "./foo";
+            it("works", () => {
+                assertEq(2, foo(1, 1));
+            });
+        "#,
+    )?;
+    context.write(
+        "foo.ts",
+        r#"
+            export function foo(a: number, b: number) {
+                return a + b;
+            }
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        "
+            index.test.ts -> works ...
+            index.test.ts -> works PASSED
+        ",
+    );
+    Ok(())
+}
+
+#[test]
+fn local_imports_with_tsx_extension() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { assertEq, it } from "str";
+            import { foo } from "./foo";
+            it("works", () => {
+                assertEq(2, foo(1, 1));
+            });
+        "#,
+    )?;
+    context.write(
+        "foo.tsx",
+        r#"
+            export function foo(a: number, b: number) {
+                return a + b;
+            }
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        "
+            index.test.ts -> works ...
+            index.test.ts -> works PASSED
         ",
     );
     Ok(())

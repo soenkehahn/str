@@ -1,3 +1,4 @@
+- Set up CI for different node versions
 - Catch exceptions during tests
 - Show statistics of failing and passing tests at the end
 - Nice colors in output

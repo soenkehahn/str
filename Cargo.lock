@@ -534,6 +534,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "lexiclean"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "441225017b106b9f902e97947a6d31e44ebcf274b91bdbfb51e5c477fcd468e5"
+
+[[package]]
 name = "libc"
 version = "0.2.112"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1239,6 +1245,7 @@ dependencies = [
  "anyhow",
  "cradle",
  "executable-path",
+ "lexiclean",
  "pretty_assertions",
  "swc",
  "swc_common",
