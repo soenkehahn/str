@@ -444,3 +444,26 @@ fn local_imports_of_index_files() -> Result<()> {
     );
     Ok(())
 }
+
+#[test]
+fn unused_missing_modules_cause_errors() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { assertEq, it } from "str";
+            import { foo } from "./missing";
+            it("works", () => {
+                assertEq(true, true);
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        1,
+        r#"
+            ERROR: cannot find module "./missing" (imported from "index.test.ts")
+        "#,
+    );
+    Ok(())
+}

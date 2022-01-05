@@ -74,7 +74,7 @@ impl Imports {
         let compiler = swc::Compiler::new(spans.clone());
         GLOBALS.set(compiler.globals(), || -> Result<String> {
             let syntax = EsVersion::Es2015;
-            let program = compiler.parse_js(
+            let mut program = compiler.parse_js(
                 file,
                 &handler,
                 syntax,
@@ -85,6 +85,7 @@ impl Imports {
                 IsModule::Bool(true),
                 true,
             )?;
+            program.visit_mut_with(self);
             let top_level_mark = Mark::fresh(Mark::root());
             let transforms = chain!(
                 swc_ecma_transforms_react::jsx(
@@ -96,8 +97,7 @@ impl Imports {
                 swc_ecma_transforms::resolver_with_mark(top_level_mark),
                 swc_ecma_transforms_typescript::strip::strip(top_level_mark),
             );
-            let mut program = compiler.transform(&handler, program, false, transforms);
-            program.visit_mut_with(self);
+            let program = compiler.transform(&handler, program, false, transforms);
             let output = compiler.print(
                 &program,
                 Some(path.to_string_lossy().as_ref()),
@@ -154,7 +154,7 @@ impl Imports {
             }
         }
         Err(anyhow!(
-            "cannot find module \"{}\" (imported from {})",
+            "cannot find module \"{}\" (imported from \"{}\")",
             import_string,
             self.current_file.to_string_lossy()
         ))
