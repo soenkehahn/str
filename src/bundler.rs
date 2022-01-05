@@ -143,6 +143,15 @@ impl Imports {
             if candidate.exists() {
                 return Ok(candidate);
             }
+            let candidate = self
+                .current_dir()?
+                .join(import_string)
+                .join("index")
+                .with_extension(module_extension)
+                .lexiclean();
+            if candidate.exists() {
+                return Ok(candidate);
+            }
         }
         Err(anyhow!(
             "cannot find module \"{}\" (imported from {})",
