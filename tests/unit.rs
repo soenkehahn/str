@@ -271,32 +271,10 @@ fn multiple_failing_tests() -> Result<()> {
 }
 
 #[test]
-fn test_modules_have_same_base_names() -> Result<()> {
+fn jsx_works() -> Result<()> {
     let context = Context::new()?;
     context.write(
-        "src/foo.ts",
-        r#"
-            import { assertEq, it } from "str";
-            import { fileURLToPath } from 'url'
-            import { basename, dirname, extname } from 'path'
-
-            it("has the basename foo", () => {
-                let path = fileURLToPath(import.meta.url);
-                const filename = basename(path, extname(path));
-                assertEq("foo", filename);
-            });
-        "#,
-    )?;
-    let result = context.run("src/foo.ts");
-    assert_eq!(result.status.code(), Some(0));
-    Ok(())
-}
-
-#[test]
-fn jsx() -> Result<()> {
-    let context = Context::new()?;
-    context.write(
-        "src/index.test.ts",
+        "src/index.test.tsx",
         r#"
             import { assertEq, it } from "str";
             import * as React from "react";
@@ -307,11 +285,11 @@ fn jsx() -> Result<()> {
         "#,
     )?;
     context.run_assert(
-        "src/index.test.ts",
+        "src/index.test.tsx",
         0,
         "
-            src/index.test.ts -> works ...
-            src/index.test.ts -> works PASSED
+            src/index.test.tsx -> works ...
+            src/index.test.tsx -> works PASSED
         ",
     );
     Ok(())
@@ -446,15 +424,16 @@ fn local_imports_of_index_files() -> Result<()> {
 }
 
 #[test]
-fn unused_missing_modules_cause_errors() -> Result<()> {
+fn errors_contain_source_location() -> Result<()> {
     let context = Context::new()?;
     context.write(
         "index.test.ts",
         r#"
             import { assertEq, it } from "str";
-            import { foo } from "./missing";
+            import { something } from "missing";
+            import { somethingElse } from "./also_missing";
             it("works", () => {
-                assertEq(true, true);
+                assertEq(something, somethingElse);
             });
         "#,
     )?;
@@ -462,14 +441,16 @@ fn unused_missing_modules_cause_errors() -> Result<()> {
         "index.test.ts",
         1,
         r#"
-            ERROR: cannot find module "./missing" (imported from "index.test.ts")
+            ERROR:
+            Could not resolve "missing" (mark it as external to exclude it from the bundle) [index.test.ts:3:38]
+            Could not resolve "./also_missing" [index.test.ts:4:42]
         "#,
     );
     Ok(())
 }
 
 #[test]
-fn errors_for_transitive_dependencies_contain_correct_files() -> Result<()> {
+fn errors_in_dependencies_contain_source_location() -> Result<()> {
     let context = Context::new()?;
     context.write(
         "index.test.ts",
@@ -494,7 +475,39 @@ fn errors_for_transitive_dependencies_contain_correct_files() -> Result<()> {
         "index.test.ts",
         1,
         r#"
-            ERROR: cannot find module "./missing" (imported from "foo.ts")
+            ERROR:
+            Could not resolve "./missing" [foo.ts:2:38]
+        "#,
+    );
+    Ok(())
+}
+
+#[test]
+fn reexport_ts_types() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { assertEq, it } from "str";
+            export { T } from "./dependency";
+            it("works", () => {
+                let x: T = true;
+                assertEq(x, true);
+            });
+        "#,
+    )?;
+    context.write(
+        "dependency.ts",
+        r#"
+            export type T = boolean;
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> works ...
+            index.test.ts -> works PASSED
         "#,
     );
     Ok(())

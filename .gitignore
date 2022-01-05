@@ -2,3 +2,4 @@ node_modules/
 /target/
 /typescript-library/dist/
 /typescript-library/str.tgz
+/example/str-dist/

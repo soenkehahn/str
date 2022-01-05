@@ -10,7 +10,7 @@ fn main() {
     match run() {
         Ok(()) => {}
         Err(error) => {
-            eprintln!("ERROR: {}", error);
+            eprintln!("ERROR:\n{}", error);
             std::process::exit(1);
         }
     }

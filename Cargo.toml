@@ -6,22 +6,10 @@ edition = "2021"
 [dependencies]
 anyhow = "*"
 cradle = "*"
-lexiclean = "*"
-swc = "*"
-swc_ecma_ast = "*"
-swc_ecma_parser = "*"
-swc_ecma_transforms = "*"
-swc_ecma_transforms_react = "*"
-swc_ecma_transforms_typescript = "*"
-swc_ecma_visit = "*"
-swc_visit = "*"
+esbuild-rs = "*"
 tempfile = "*"
-
-[dependencies.swc_common]
-version = "*"
-features = ["tty-emitter"]
+unindent = "*"
 
 [dev-dependencies]
 executable-path = "*"
 pretty_assertions = "*"
-unindent = "*"

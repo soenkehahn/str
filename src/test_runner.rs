@@ -1,4 +1,4 @@
-use crate::bundler::Imports;
+use crate::bundler::Bundler;
 use anyhow::anyhow;
 use anyhow::Result;
 use cradle::prelude::*;
@@ -6,6 +6,7 @@ use std::os::unix;
 use std::path::Path;
 use std::process::ExitStatus;
 use tempfile::TempDir;
+use unindent::Unindent;
 
 pub struct TestRunner {
     temp_dir: TempDir,
@@ -35,31 +36,29 @@ impl TestRunner {
     }
 
     fn run_as_module(&self, test_file: &Path) -> Result<ExitStatus> {
-        let js_file = Imports::run(test_file, self.temp_dir.path())?;
-        let Status(status) = (
-            "node",
-            "--experimental-specifier-resolution=node",
-            "--input-type=module",
-            Stdin(TestRunner::runner_code(test_file, &js_file)?),
-        )
-            .run_output();
+        std::fs::create_dir_all("str-dist")?;
+        let runner_file = Path::new("str-dist/runner.mjs");
+        std::fs::write(&runner_file, TestRunner::runner_code(test_file)?)?;
+        let js_file = Bundler::bundle(runner_file, self.temp_dir.path())?;
+        let Status(status) = ("node", js_file).run_output();
         Ok(status)
     }
 
-    fn runner_code(original_file: &Path, test_js_file: &Path) -> Result<String> {
+    fn runner_code(test_file: &Path) -> Result<String> {
+        let test_file = path_to_str(test_file)?;
         Ok(format!(
             "
                 import {{ _strTestRunner }} from \"str\";
                 async function main() {{
                     _strTestRunner.setTestFile(\"{}\");
-                    await import(\"{}\");
+                    await import(\"../{}\");
                     _strTestRunner.finalize();
                 }}
                 main();
             ",
-            path_to_str(original_file)?,
-            path_to_str(test_js_file)?
-        ))
+            test_file, test_file
+        )
+        .unindent())
     }
 }
 

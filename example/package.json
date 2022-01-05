@@ -3,6 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "devDependencies": {
-    "str": "link:../typescript-library/"
+    "str": "../typescript-library/"
+  },
+  "dependencies": {
+    "axios": "^0.24.0",
+    "esbuild": "^0.14.10"
   }
 }
