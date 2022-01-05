@@ -55,8 +55,8 @@ impl Context {
 
     fn run_assert(&self, file: &str, expected_exit_code: i32, expected_stderr: &str) {
         let output = self.run(file);
-        assert_eq!(output.stderr, expected_stderr.unindent());
         assert_eq!(output.status.code(), Some(expected_exit_code));
+        assert_eq!(output.stderr, expected_stderr.unindent());
     }
 }
 
@@ -364,6 +364,38 @@ fn local_imports_with_tsx_extension() -> Result<()> {
     )?;
     context.write(
         "foo.tsx",
+        r#"
+            export function foo(a: number, b: number) {
+                return a + b;
+            }
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        "
+            index.test.ts -> works ...
+            index.test.ts -> works PASSED
+        ",
+    );
+    Ok(())
+}
+
+#[test]
+fn local_imports_in_subdirectories() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { assertEq, it } from "str";
+            import { foo } from "./subdir/foo";
+            it("works", () => {
+                assertEq(2, foo(1, 1));
+            });
+        "#,
+    )?;
+    context.write(
+        "subdir/foo.ts",
         r#"
             export function foo(a: number, b: number) {
                 return a + b;

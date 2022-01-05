@@ -34,7 +34,13 @@ impl Imports {
         imports.push(Ok(main_file.to_owned()));
         while let Some(file) = imports.pop()? {
             let output_file = Self::get_output_file(output_dir, &file)?;
-            fs::write(&output_file, imports.convert_to_js(&file)?)?;
+            if let Some(dir) = output_file.parent() {
+                fs::create_dir_all(dir)?;
+            }
+            fs::write(&output_file, imports.convert_to_js(&file)?).context(anyhow!(
+                "cannot write to \"{}\"",
+                output_file.to_string_lossy()
+            ))?;
         }
         Self::get_output_file(output_dir, main_file)
     }
@@ -47,13 +53,7 @@ impl Imports {
     }
 
     fn get_output_file(output_dir: &Path, file: &Path) -> Result<PathBuf> {
-        Ok(output_dir.join(format!(
-            "{}.mjs",
-            file.file_stem()
-                .ok_or_else(|| anyhow!("no file stem: {:?}", file))?
-                .to_str()
-                .ok_or_else(|| anyhow!("cannot convert to string: {:?}", file))?
-        )))
+        Ok(output_dir.join(file).with_extension("mjs"))
     }
 
     fn new(current_file: &Path) -> Result<Self> {
