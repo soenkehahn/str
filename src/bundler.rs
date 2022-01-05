@@ -33,11 +33,13 @@ impl Imports {
         let mut imports = Self::new(main_file)?;
         imports.push(Ok(main_file.to_owned()));
         while let Some(file) = imports.pop()? {
+            imports.current_file = file.clone();
             let output_file = Self::get_output_file(output_dir, &file)?;
             if let Some(dir) = output_file.parent() {
                 fs::create_dir_all(dir)?;
             }
-            fs::write(&output_file, imports.convert_to_js(&file)?).context(anyhow!(
+            let code = imports.convert_to_js(&file)?;
+            fs::write(&output_file, code).context(anyhow!(
                 "cannot write to \"{}\"",
                 output_file.to_string_lossy()
             ))?;

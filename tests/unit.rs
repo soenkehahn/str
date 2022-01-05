@@ -467,3 +467,35 @@ fn unused_missing_modules_cause_errors() -> Result<()> {
     );
     Ok(())
 }
+
+#[test]
+fn errors_for_transitive_dependencies_contain_correct_files() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { assertEq, it } from "str";
+            import { foo } from "./foo";
+            it("works", () => {
+                assertEq(2, foo(1, 1));
+            });
+        "#,
+    )?;
+    context.write(
+        "foo.ts",
+        r#"
+            import { something } from "./missing";
+            export function foo(a, b) {
+                return something(a, b);
+            }
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        1,
+        r#"
+            ERROR: cannot find module "./missing" (imported from "foo.ts")
+        "#,
+    );
+    Ok(())
+}
