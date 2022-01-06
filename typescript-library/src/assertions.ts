@@ -1,24 +1,4 @@
-type StrTestRunner = {
-  setTestFile: (file: string) => void;
-  currentTestFile: string | null;
-  fails: boolean;
-  finalize: () => void;
-};
-
-export const _strTestRunner: StrTestRunner = {
-  setTestFile: (file: string) => {
-    _strTestRunner.currentTestFile = file;
-  },
-  currentTestFile: null,
-  fails: false,
-  finalize: () => {
-    if (_strTestRunner.fails) {
-      process.exit(1);
-    }
-  },
-};
-
-class StrTestFailure {}
+import { _strTestRunner, StrTestFailure } from "./test_runner";
 
 export function it(testName: string, test: () => void) {
   console.error(`${_strTestRunner.currentTestFile} -> ${testName} ...`);

@@ -40,5 +40,6 @@ typescript-library-bundle: setup
   #!/usr/bin/env bash
   set -eu
   cd typescript-library
-  ls *.ts tsconfig.json | ../if-newer - dist/index.js yarn tsc
+  (find src -type f -name '*.ts' ; echo tsconfig.json) | \
+    ../if-newer - dist/index.js yarn tsc
   ../if-newer dist/index.js str.tgz yarn pack --filename str.tgz
