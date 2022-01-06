@@ -15,9 +15,13 @@ export function it(testName: string, test: () => void) {
   }
 }
 
-export function assertEq<T>(a: T, b: T) {
+export function assertEq<T>(a: T, b: T): void {
   if (a !== b) {
     console.error(`${a}\n    !==\n${b}`);
     throw new StrTestFailure();
   }
+}
+
+export function beforeAll(f: () => void): void {
+  f();
 }
