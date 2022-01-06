@@ -5,15 +5,14 @@ in typescript.
 
 ## Installation from source
 
-- Install [just](https://github.com/casey/just).
 - Install [rust](https://www.rust-lang.org/).
 - Clone the repo into `$STR_REPO`.
-- Install with `cd $STR_REPO ; just install`.
+- Install with `cd $STR_REPO ; cargo install --path .`.
 
 ## How to use it?
 
 - In your project, do:
-  `yarn add link:$STR_REPO`
+  `yarn add --dev link:$STR_REPO/typescript-library`
 - Create a test-suite, e.g.:
 
 ```typescript
