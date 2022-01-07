@@ -10,6 +10,7 @@ use std::process::ExitStatus;
 use tempfile::TempDir;
 use unindent::Unindent;
 
+#[derive(Debug)]
 struct Context {
     temp_dir: TempDir,
 }
@@ -509,6 +510,35 @@ fn reexport_ts_types() -> Result<()> {
             index.test.ts -> works ...
             index.test.ts -> works PASSED
         "#,
+    );
+    Ok(())
+}
+
+#[test]
+#[ignore]
+fn __dirname_works_as_intended() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { it } from "str";
+
+            it("test", () => {
+                console.error(`__dirname: ${__dirname}`);
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        &format!(
+            r#"
+                index.test.ts -> test ...
+                __dirname: {}
+                index.test.ts -> test PASSED
+            "#,
+            context.temp_dir.path().to_string_lossy(),
+        ),
     );
     Ok(())
 }
