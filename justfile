@@ -13,14 +13,17 @@ setup:
   ../if-newer package.json node_modules/.touch yarn install
   touch node_modules/.touch
 
-test *args="": typescript-library-bundle
+build:
+  go build cmd/str.go
+
+test *args="": typescript-library-bundle build
   (cargo ltest --test unit -- {{ args }})
 
-integration: typescript-library-bundle
+integration: typescript-library-bundle build
   (cargo ltest --test integration -- --test-threads=1)
 
 run-example: setup typescript-library-bundle
-  (cd example && cargo lrun -- simple.ts || true)
+  (cd example && go run ../cmd/str.go simple.ts || true)
 
 clippy:
   cargo lclippy --tests

@@ -1,15 +1,11 @@
 [package]
-name = "str"
+name = "str-tests"
 version = "0.0.0"
 edition = "2021"
 
-[dependencies]
-anyhow = "*"
-cradle = "*"
-esbuild-rs = "*"
-tempfile = "*"
-unindent = "*"
-
 [dev-dependencies]
-executable-path = "*"
+cradle = "*"
+anyhow = "*"
+tempfile = "*"
 pretty_assertions = "*"
+unindent = "*"

@@ -6,6 +6,7 @@ use std::fs;
 use std::fs::create_dir_all;
 use std::os::unix;
 use std::path::Path;
+use std::path::PathBuf;
 use std::process::ExitStatus;
 use tempfile::TempDir;
 use unindent::Unindent;
@@ -13,6 +14,16 @@ use unindent::Unindent;
 #[derive(Debug)]
 struct Context {
     temp_dir: TempDir,
+    repo_dir: PathBuf,
+}
+
+fn assert_contains<A: AsRef<str>, B: AsRef<str>>(a: A, b: B) {
+    assert!(
+        a.as_ref().contains(b.as_ref()),
+        "\nassert_contains(\n\n  {:?},\n\n  {:?}\n\n)\n",
+        a.as_ref(),
+        b.as_ref()
+    );
 }
 
 impl Context {
@@ -30,7 +41,7 @@ impl Context {
                     .join(dependency.file_name().unwrap()),
             )?;
         }
-        Ok(Context { temp_dir })
+        Ok(Context { temp_dir, repo_dir })
     }
 
     fn write<P: AsRef<Path>>(&self, path: P, content: &str) -> Result<()> {
@@ -42,8 +53,7 @@ impl Context {
     }
 
     fn run(&self, file: &str) -> Output {
-        let (Stderr(stderr), Status(status)) =
-            self.run_command((executable_path::executable_path("str"), file));
+        let (Stderr(stderr), Status(status)) = self.run_command((self.repo_dir.join("str"), file));
         eprintln!("STDERR:\n{}STDERR END", stderr);
         Output { status, stderr }
     }
@@ -58,6 +68,12 @@ impl Context {
         let output = self.run(file);
         assert_eq!(output.status.code(), Some(expected_exit_code));
         assert_eq!(output.stderr, expected_stderr.unindent());
+    }
+
+    fn run_assert_stderr(&self, file: &str, expected_exit_code: i32) -> String {
+        let output = self.run(file);
+        assert_eq!(output.status.code(), Some(expected_exit_code));
+        output.stderr
     }
 }
 
@@ -438,15 +454,11 @@ fn errors_contain_source_location() -> Result<()> {
             });
         "#,
     )?;
-    context.run_assert(
-        "index.test.ts",
-        1,
-        r#"
-            ERROR:
-            Could not resolve "missing" (mark it as external to exclude it from the bundle) [index.test.ts:3:38]
-            Could not resolve "./also_missing" [index.test.ts:4:42]
-        "#,
-    );
+    let stderr = context.run_assert_stderr("index.test.ts", 1);
+    assert_contains(&stderr, "Could not resolve \"missing\"");
+    assert_contains(&stderr, "index.test.ts:3:38");
+    assert_contains(&stderr, "Could not resolve \"./also_missing\"");
+    assert_contains(&stderr, "index.test.ts:4:42");
     Ok(())
 }
 
@@ -472,14 +484,26 @@ fn errors_in_dependencies_contain_source_location() -> Result<()> {
             }
         "#,
     )?;
-    context.run_assert(
+    let stderr = context.run_assert_stderr("index.test.ts", 1);
+    assert_contains(&stderr, "Could not resolve \"./missing\"");
+    assert_contains(&stderr, "foo.ts:2:38");
+    Ok(())
+}
+
+#[test]
+fn bundling_errors_mean_node_will_not_be_run() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
         "index.test.ts",
-        1,
         r#"
-            ERROR:
-            Could not resolve "./missing" [foo.ts:2:38]
+            import { something } from "missing";
+            something();
         "#,
-    );
+    )?;
+    let stderr = context.run_assert_stderr("index.test.ts", 1);
+    assert_contains(&stderr, "Could not resolve \"missing\"");
+    assert_contains(&stderr, "index.test.ts:2:38");
+    assert!(!stderr.contains("node"));
     Ok(())
 }
 

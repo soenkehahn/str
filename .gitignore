@@ -3,3 +3,4 @@ node_modules/
 /typescript-library/dist/
 /typescript-library/str.tgz
 /example/str-dist/
+/str

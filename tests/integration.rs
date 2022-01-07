@@ -15,14 +15,16 @@ fn integration_test() -> Result<()> {
     build_command.run_result()?;
     let StdoutTrimmed(image) = (build_command, "--quiet").run_result()?;
     fn run_command(image: &str, file: &str) -> impl Input {
-        let str_executable = executable_path::executable_path("str");
         (
             LogCommand,
             ("podman", "run"),
             "--rm",
             (
                 "-v",
-                format!("{}:/usr/local/bin/str", str_executable.to_string_lossy()),
+                format!(
+                    "{}/str:/usr/local/bin/str",
+                    std::env::current_dir().unwrap().to_str().unwrap()
+                ),
             ),
             image.to_owned(),
             ("str", file.to_owned()),
