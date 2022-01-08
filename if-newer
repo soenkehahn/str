@@ -23,7 +23,8 @@ command = sys.argv[3:]
 
 
 def runCommand():
-    subprocess.run(command)
+    result = subprocess.run(command)
+    sys.exit(result.returncode)
 
 
 inputPathModified = 0
