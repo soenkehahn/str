@@ -17,7 +17,8 @@ build:
   go build cmd/str.go
 
 test *args="": typescript-library-bundle build
-  (cargo ltest --test unit -- {{ args }})
+  cargo ltest --test basic -- {{ args }}
+  cargo ltest --test assertions -- {{ args }}
 
 integration: typescript-library-bundle build
   (cargo ltest --test integration -- --test-threads=1)

@@ -1,86 +1,10 @@
-use anyhow::anyhow;
+mod common;
+
 use anyhow::Result;
+use common::assert_contains;
+use common::Context;
 use cradle::prelude::*;
 use pretty_assertions::assert_eq;
-use std::fs;
-use std::fs::create_dir_all;
-use std::os::unix;
-use std::path::Path;
-use std::path::PathBuf;
-use std::process::ExitStatus;
-use tempfile::TempDir;
-use unindent::Unindent;
-
-#[derive(Debug)]
-struct Context {
-    temp_dir: TempDir,
-    repo_dir: PathBuf,
-}
-
-fn assert_contains<A: AsRef<str>, B: AsRef<str>>(a: A, b: B) {
-    assert!(
-        a.as_ref().contains(b.as_ref()),
-        "\nassert_contains(\n\n  {:?},\n\n  {:?}\n\n)\n",
-        a.as_ref(),
-        b.as_ref()
-    );
-}
-
-impl Context {
-    fn new() -> Result<Self> {
-        let repo_dir = std::env::current_dir()?;
-        let temp_dir = TempDir::new()?;
-        ("mkdir", temp_dir.path().join("node_modules/")).run();
-        for dependency in fs::read_dir(repo_dir.join("tests/test-project/node_modules"))? {
-            let dependency = dependency?.path();
-            unix::fs::symlink(
-                &dependency,
-                temp_dir
-                    .path()
-                    .join("node_modules/")
-                    .join(dependency.file_name().unwrap()),
-            )?;
-        }
-        Ok(Context { temp_dir, repo_dir })
-    }
-
-    fn write<P: AsRef<Path>>(&self, path: P, content: &str) -> Result<()> {
-        let file = self.temp_dir.path().join(path.as_ref());
-        let dir = file.parent().ok_or(anyhow!("no parent"))?;
-        create_dir_all(&dir)?;
-        fs::write(file, content)?;
-        Ok(())
-    }
-
-    fn run(&self, file: &str) -> Output {
-        let (Stderr(stderr), Status(status)) = self.run_command((self.repo_dir.join("str"), file));
-        eprintln!("STDERR:\n{}STDERR END", stderr);
-        Output { status, stderr }
-    }
-
-    fn run_command<I: Input, O: cradle::Output>(&self, i: I) -> O {
-        let (StdoutUntrimmed(stdout), o) = (CurrentDir(self.temp_dir.path()), i).run_output();
-        print!("{}", stdout);
-        o
-    }
-
-    fn run_assert(&self, file: &str, expected_exit_code: i32, expected_stderr: &str) {
-        let output = self.run(file);
-        assert_eq!(output.status.code(), Some(expected_exit_code));
-        assert_eq!(output.stderr, expected_stderr.unindent());
-    }
-
-    fn run_assert_stderr(&self, file: &str, expected_exit_code: i32) -> String {
-        let output = self.run(file);
-        assert_eq!(output.status.code(), Some(expected_exit_code));
-        output.stderr
-    }
-}
-
-struct Output {
-    status: ExitStatus,
-    stderr: String,
-}
 
 #[test]
 fn simple_test_failure() -> Result<()> {
@@ -551,7 +475,6 @@ fn __dirname_works_as_intended() -> Result<()> {
         "index.test.ts",
         r#"
             import { it } from "str";
-
             it("test", () => {
                 console.error(`__dirname: ${__dirname}`);
             });
@@ -568,71 +491,6 @@ fn __dirname_works_as_intended() -> Result<()> {
             "#,
             context.temp_dir.path().to_string_lossy(),
         ),
-    );
-    Ok(())
-}
-
-#[test]
-fn before_all_runs_before_all_tests_once() -> Result<()> {
-    let context = Context::new()?;
-    context.write(
-        "index.test.ts",
-        r#"
-            import { assertEq, it, beforeAll } from "str";
-
-            let counter = 0;
-
-            beforeAll(() => {
-                counter += 1;
-            });
-
-            it("a", () => {
-                assertEq(counter, 1);
-            });
-
-            it("b", () => {
-                assertEq(counter, 1);
-            });
-        "#,
-    )?;
-    context.run_assert(
-        "index.test.ts",
-        0,
-        r#"
-            index.test.ts -> a ...
-            index.test.ts -> a PASSED
-            index.test.ts -> b ...
-            index.test.ts -> b PASSED
-        "#,
-    );
-    Ok(())
-}
-
-#[test]
-fn before_all_allows_to_initialize_variables() -> Result<()> {
-    let context = Context::new()?;
-    context.write(
-        "index.test.ts",
-        r#"
-            import { assertEq, it, beforeAll } from "str";
-
-            let test_variable;
-            beforeAll(() => {
-                test_variable = "set";
-            });
-
-            it("works", () => {
-                assertEq(test_variable, "set");
-            });
-        "#,
-    )?;
-    context.run_assert(
-        "index.test.ts",
-        0,
-        r#"
-            index.test.ts -> works ...
-            index.test.ts -> works PASSED
-        "#,
     );
     Ok(())
 }
