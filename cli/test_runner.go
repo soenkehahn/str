@@ -10,17 +10,16 @@ import (
 )
 
 func RunTestFile(testFile string) (int, error) {
-	strDistDir := "./str-dist"
-	os.Mkdir(strDistDir, 0755)
-	runnerFilePath := strDistDir + "/runner.mjs"
-	err := writeFile(runnerFilePath, runnerCode(testFile))
+	strDistDir, err := os.MkdirTemp("", "str-bundle")
 	if err != nil {
-		return 0, err
+		return 1, err
 	}
+	defer os.RemoveAll(strDistDir)
+	os.Mkdir(strDistDir, 0755)
 	bundleFile := strDistDir + "/main.js"
-	err = bundle(runnerFilePath, bundleFile)
+	err = bundle(runnerCode(testFile), bundleFile)
 	if err != nil {
-		return 0, err
+		return 1, err
 	}
 	return runBundle(bundleFile)
 }
@@ -43,7 +42,7 @@ func runnerCode(testFile string) string {
 		import { _strTestRunner } from "str";
 		async function main() {
 			_strTestRunner.setTestFile("%s");
-			await import("../%s");
+			await import("./%s");
 			_strTestRunner.finalize();
 		}
 		main();
@@ -60,10 +59,10 @@ func runBundle(bundleFile string) (int, error) {
 			if status, ok := exitErr.Sys().(syscall.WaitStatus); ok {
 				return status.ExitStatus(), nil
 			} else {
-				return 0, exitErr
+				return 1, exitErr
 			}
 		} else {
-			return 0, exitErr
+			return 1, exitErr
 		}
 	}
 	return 0, nil

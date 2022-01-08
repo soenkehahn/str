@@ -631,3 +631,22 @@ fn before_all_allows_to_initialize_variables() -> Result<()> {
     );
     Ok(())
 }
+
+#[test]
+fn does_not_create_other_files_or_directories() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { assertEq, it } from "str";
+            it("works", () => {
+                assertEq(true, true);
+            });
+        "#,
+    )?;
+    let StdoutUntrimmed(before) = context.run_command("ls");
+    context.run_assert_stderr("index.test.ts", 0);
+    let StdoutUntrimmed(after) = context.run_command("ls");
+    assert_eq!(before, after);
+    Ok(())
+}

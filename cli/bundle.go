@@ -4,12 +4,17 @@ import (
 	"github.com/evanw/esbuild/pkg/api"
 )
 
-func bundle(input string, outputFile string) error {
+func bundle(inputCode string, outputFile string) error {
 	buildResult := api.Build(api.BuildOptions{
-		EntryPoints: []string{input},
+		EntryPoints: []string{},
 		Outfile:     outputFile,
 		Bundle:      true,
 		Write:       true,
+		Stdin: &api.StdinOptions{
+			Contents:   inputCode,
+			ResolveDir: ".",
+			Sourcefile: "<str test runner>",
+		},
 	})
 	if len(buildResult.Errors) > 0 {
 		formattedErrors := api.FormatMessages(buildResult.Errors, api.FormatMessagesOptions{
