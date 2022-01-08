@@ -36,8 +36,8 @@ render-readme-check:
   set -eux
   diff <(php README.php) README.md
 
-install prefix="/usr/local":
-  cargo install --path . --root {{ prefix }}
+install prefix="/usr/local": build
+  cp str {{ prefix }}/bin/
 
 typescript-library-bundle: setup
   #!/usr/bin/env bash

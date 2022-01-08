@@ -650,3 +650,24 @@ fn does_not_create_other_files_or_directories() -> Result<()> {
     assert_eq!(before, after);
     Ok(())
 }
+
+#[test]
+fn node_apis() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { assertEq, it } from "str";
+            import { basename } from "path";
+            console.error(basename("dir/file"));
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        "
+            file
+        ",
+    );
+    Ok(())
+}

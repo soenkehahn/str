@@ -10,6 +10,7 @@ func bundle(inputCode string, outputFile string) error {
 		Outfile:     outputFile,
 		Bundle:      true,
 		Write:       true,
+		Platform:    api.PlatformNode,
 		Stdin: &api.StdinOptions{
 			Contents:   inputCode,
 			ResolveDir: ".",
