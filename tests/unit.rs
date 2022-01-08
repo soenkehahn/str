@@ -288,17 +288,23 @@ fn multiple_failing_tests() -> Result<()> {
 }
 
 #[test]
-fn jsx_works() -> Result<()> {
+fn jsx_and_tsx() -> Result<()> {
     let context = Context::new()?;
     context.write(
         "src/index.test.tsx",
         r#"
             import { assertEq, it } from "str";
+            import { Foo } from "./foo";
             import * as React from "react";
             it("works", () => {
-                const App = () => <div> foo </div>;
-                const app = <App />;
+                const foo = <Foo />;
             });
+        "#,
+    )?;
+    context.write(
+        "src/foo.jsx",
+        r#"
+            export const Foo = () => <div> foo </div>;
         "#,
     )?;
     context.run_assert(
@@ -539,7 +545,6 @@ fn reexport_ts_types() -> Result<()> {
 }
 
 #[test]
-#[ignore]
 fn __dirname_works_as_intended() -> Result<()> {
     let context = Context::new()?;
     context.write(

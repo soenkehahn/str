@@ -16,6 +16,7 @@ func bundle(inputCode string, outputFile string) error {
 			ResolveDir: ".",
 			Sourcefile: "<str test runner>",
 		},
+		Plugins: []api.Plugin{injectDirname},
 	})
 	if len(buildResult.Errors) > 0 {
 		formattedErrors := api.FormatMessages(buildResult.Errors, api.FormatMessagesOptions{
