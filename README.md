@@ -16,14 +16,16 @@ in typescript.
 - Create a test-suite, e.g.:
 
 ```typescript
-import { it, assertEq } from "str";
+import { it, assertEq, describe } from "str";
 
-it("works", () => {
-  assertEq(true, true);
-});
+describe("my app", () => {
+  it("works", () => {
+    assertEq(true, true);
+  });
 
-it("fails", () => {
-  assertEq(true, false);
+  it("fails", () => {
+    assertEq(true, false);
+  });
 });
 ```
 

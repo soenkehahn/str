@@ -1,21 +1,38 @@
 export class StrTestFailure {}
 
+type LogKind = "start" | "passed" | "failed";
+
 export type StrTestRunner = {
-  setTestFile: (file: string) => void;
-  currentTestFile: string | null;
   fails: boolean;
   finalize: () => void;
+
+  testDescriptionStack: Array<string>;
+  log: (kind: LogKind) => void;
 };
 
 export const _strTestRunner: StrTestRunner = {
-  setTestFile: (file: string) => {
-    _strTestRunner.currentTestFile = file;
-  },
-  currentTestFile: null,
   fails: false,
   finalize: () => {
     if (_strTestRunner.fails) {
       process.exit(1);
     }
   },
+
+  testDescriptionStack: [],
+  log: (kind: LogKind) => {
+    const testDescription = _strTestRunner.testDescriptionStack.join(" -> ");
+    let kindSnippet;
+    if (kind === "start") {
+      kindSnippet = "...";
+    } else if (kind === "passed") {
+      kindSnippet = "PASSED";
+    } else if (kind === "failed") {
+      kindSnippet = "FAILED";
+    } else {
+      exhaustivenessCheck(kind);
+    }
+    console.error(`${testDescription} ${kindSnippet}`);
+  },
 };
+
+function exhaustivenessCheck(param: never) {}

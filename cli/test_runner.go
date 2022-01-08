@@ -9,6 +9,19 @@ import (
 	"github.com/lithammer/dedent"
 )
 
+func runnerCode(testFile string) string {
+	return dedent.Dedent(fmt.Sprintf(`
+		import { _strTestRunner } from "str";
+		async function main() {
+			_strTestRunner.testDescriptionStack.push("%s");
+			await import("./%s");
+			_strTestRunner.testDescriptionStack.pop();
+			_strTestRunner.finalize();
+		}
+		main();
+	`, testFile, testFile))
+}
+
 func RunTestFile(testFile string) (int, error) {
 	strDistDir, err := os.MkdirTemp("", "str-bundle")
 	if err != nil {
@@ -35,18 +48,6 @@ func writeFile(file string, content string) error {
 	}
 	runnerFile.Close()
 	return nil
-}
-
-func runnerCode(testFile string) string {
-	return dedent.Dedent(fmt.Sprintf(`
-		import { _strTestRunner } from "str";
-		async function main() {
-			_strTestRunner.setTestFile("%s");
-			await import("./%s");
-			_strTestRunner.finalize();
-		}
-		main();
-	`, testFile, testFile))
 }
 
 func runBundle(bundleFile string) (int, error) {
