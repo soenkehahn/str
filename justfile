@@ -1,4 +1,4 @@
-ci: setup test typescript-tests run-example clippy render-readme-check integration
+ci: setup test run-example clippy render-readme-check integration
 
 setup:
   #!/usr/bin/env bash
@@ -12,15 +12,9 @@ setup:
   cd ../../example
   ../if-newer package.json node_modules/.touch yarn install
   touch node_modules/.touch
-  cd ../typescript-tests
-  ../if-newer package.json node_modules/.touch yarn install
-  touch node_modules/.touch
 
 build:
   go build cmd/str.go
-
-typescript-tests *args="": setup
-  (cd typescript-tests/ ; yarn jest {{ args }})
 
 test *args="": typescript-library-bundle build
   cargo ltest --test basic -- {{ args }}
