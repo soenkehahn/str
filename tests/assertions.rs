@@ -113,17 +113,14 @@ fn before_each_is_run_before_every_test() -> Result<()> {
         "index.test.ts",
         r#"
             import { assertEq, it, beforeEach } from "str";
-
             let test_variable;
             beforeEach(() => {
                 test_variable = "set";
             });
-
             it("works", () => {
                 console.error(test_variable);
                 test_variable = "dirty";
             });
-
             it("works", () => {
                 console.error(test_variable);
             });
@@ -290,17 +287,13 @@ fn before_all_runs_before_all_tests_once() -> Result<()> {
         "index.test.ts",
         r#"
             import { assertEq, it, beforeAll } from "str";
-
             let counter = 0;
-
             beforeAll(() => {
                 counter += 1;
             });
-
             it("a", () => {
                 console.error(counter);
             });
-
             it("b", () => {
                 console.error(counter);
             });
