@@ -1,4 +1,4 @@
-ci: setup test typescript-tests run-example clippy render-readme-check
+ci: setup test typescript-tests run-example clippy render-readme-check integration
 
 setup:
   #!/usr/bin/env bash
