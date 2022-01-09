@@ -1,26 +1,22 @@
-import { _strTestRunner, StrTestFailure } from "./test_runner";
+import { _strTestRunner, StrTestFailure, newTestTree } from "./test_runner";
 
 export function describe(description: string, inner: () => void): void {
-  _strTestRunner.testDescriptionStack.push(description);
+  let child = newTestTree();
+  _strTestRunner.stackCurrent().children.push([
+    description,
+    {
+      tag: "describe",
+      tree: child,
+    },
+  ]);
+
+  _strTestRunner.stack.push(child);
   inner();
-  _strTestRunner.testDescriptionStack.pop();
+  _strTestRunner.stack.pop();
 }
 
 export function it(testName: string, test: () => void): void {
-  _strTestRunner.testDescriptionStack.push(testName);
-  _strTestRunner.log("start");
-  try {
-    test();
-    _strTestRunner.log("passed");
-  } catch (exception) {
-    if (exception instanceof StrTestFailure) {
-      _strTestRunner.log("failed");
-      _strTestRunner.fails = true;
-    } else {
-      throw exception;
-    }
-  }
-  _strTestRunner.testDescriptionStack.pop();
+  _strTestRunner.stackCurrent().children.push([testName, { tag: "it", test }]);
 }
 
 export function assertEq<T>(a: T, b: T): void {
@@ -28,8 +24,4 @@ export function assertEq<T>(a: T, b: T): void {
     console.error(`${a}\n    !==\n${b}`);
     throw new StrTestFailure();
   }
-}
-
-export function beforeAll(f: () => void): void {
-  f();
 }

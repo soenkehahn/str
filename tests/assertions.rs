@@ -4,7 +4,7 @@ use anyhow::Result;
 use common::Context;
 
 #[test]
-fn describe() -> Result<()> {
+fn describe_simple() -> Result<()> {
     let context = Context::new()?;
     context.write(
         "index.test.ts",
@@ -107,6 +107,171 @@ fn describe_pops_description_stack_correctly_after_failures() -> Result<()> {
 }
 
 #[test]
+fn before_each_is_run_before_every_test() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { assertEq, it, beforeEach } from "str";
+
+            let test_variable;
+            beforeEach(() => {
+                test_variable = "set";
+            });
+
+            it("works", () => {
+                console.error(test_variable);
+                test_variable = "dirty";
+            });
+
+            it("works", () => {
+                console.error(test_variable);
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> works ...
+            set
+            index.test.ts -> works PASSED
+            index.test.ts -> works ...
+            set
+            index.test.ts -> works PASSED
+        "#,
+    );
+    Ok(())
+}
+
+#[test]
+fn before_each_works_when_declared_later() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { assertEq, it, beforeEach } from "str";
+            let test_variable;
+            it("works", () => {
+                console.error(test_variable);
+            });
+            beforeEach(() => {
+                test_variable = "set";
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> works ...
+            set
+            index.test.ts -> works PASSED
+        "#,
+    );
+    Ok(())
+}
+
+#[test]
+fn before_each_is_run_only_for_tests_in_its_scope() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { assertEq, it, beforeEach, describe } from "str";
+            it("outer", () => {});
+            describe("scope", () => {
+                beforeEach(() => {
+                    console.error("beforeEach");
+                });
+                it("inner", () => {});
+            });
+            it("outer", () => {});
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> outer ...
+            index.test.ts -> outer PASSED
+            index.test.ts -> scope -> inner ...
+            beforeEach
+            index.test.ts -> scope -> inner PASSED
+            index.test.ts -> outer ...
+            index.test.ts -> outer PASSED
+        "#,
+    );
+    Ok(())
+}
+
+#[test]
+#[ignore]
+fn before_each_can_be_declared_multiple_times() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { assertEq, it, beforeEach, describe } from "str";
+
+            it("outer", () => {});
+
+            describe("scope", () => {
+                beforeEach(() => {
+                    console.error("beforeEach");
+                });
+                it("inner", () => {});
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> outer ...
+            index.test.ts -> outer PASSED
+            index.test.ts -> scope -> inner ...
+            beforeEach
+            index.test.ts -> scope -> inner PASSED
+        "#,
+    );
+    Ok(())
+}
+
+#[test]
+#[ignore]
+fn before_each_can_be_stacked() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { assertEq, it, beforeEach, describe } from "str";
+
+            it("outer", () => {});
+
+            describe("scope", () => {
+                beforeEach(() => {
+                    console.error("beforeEach");
+                });
+                it("inner", () => {});
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> outer ...
+            index.test.ts -> outer PASSED
+            index.test.ts -> scope -> inner ...
+            beforeEach
+            index.test.ts -> scope -> inner PASSED
+        "#,
+    );
+    Ok(())
+}
+
+#[test]
 fn before_all_runs_before_all_tests_once() -> Result<()> {
     let context = Context::new()?;
     context.write(
@@ -121,11 +286,11 @@ fn before_all_runs_before_all_tests_once() -> Result<()> {
             });
 
             it("a", () => {
-                assertEq(counter, 1);
+                console.error(counter);
             });
 
             it("b", () => {
-                assertEq(counter, 1);
+                console.error(counter);
             });
         "#,
     )?;
@@ -134,8 +299,10 @@ fn before_all_runs_before_all_tests_once() -> Result<()> {
         0,
         r#"
             index.test.ts -> a ...
+            1
             index.test.ts -> a PASSED
             index.test.ts -> b ...
+            1
             index.test.ts -> b PASSED
         "#,
     );
@@ -143,20 +310,58 @@ fn before_all_runs_before_all_tests_once() -> Result<()> {
 }
 
 #[test]
-fn before_all_allows_to_initialize_variables() -> Result<()> {
+#[ignore]
+fn before_all_runs_before_all_tests_when_declared_later() -> Result<()> {
     let context = Context::new()?;
     context.write(
         "index.test.ts",
         r#"
             import { assertEq, it, beforeAll } from "str";
 
-            let test_variable;
+            let variable;
+
+            it("a", () => {
+                console.error(variable);
+            });
+
             beforeAll(() => {
-                test_variable = "set";
+                counter = "set";
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> a ...
+            set
+            index.test.ts -> a PASSED
+        "#,
+    );
+    Ok(())
+}
+
+#[test]
+#[ignore]
+fn before_all_is_run_only_for_tests_in_its_scope() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { assertEq, it, beforeEach } from "str";
+
+            let test_variable;
+            it("works", () => {
+                console.error(test_variable);
+                test_variable = "dirty";
             });
 
             it("works", () => {
-                assertEq(test_variable, "set");
+                console.error(test_variable);
+            });
+
+            beforeEach(() => {
+                test_variable = "set";
             });
         "#,
     )?;
@@ -165,6 +370,10 @@ fn before_all_allows_to_initialize_variables() -> Result<()> {
         0,
         r#"
             index.test.ts -> works ...
+            set
+            index.test.ts -> works PASSED
+            index.test.ts -> works ...
+            set
             index.test.ts -> works PASSED
         "#,
     );
