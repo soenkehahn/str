@@ -5,5 +5,5 @@ export function beforeAll(f: () => void): void {
 }
 
 export function beforeEach(f: () => void): void {
-  _strTestRunner.stackCurrent().beforeEach = f;
+  _strTestRunner.stackCurrent().beforeEachs.push(f);
 }

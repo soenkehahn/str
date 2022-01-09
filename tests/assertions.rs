@@ -206,21 +206,22 @@ fn before_each_is_run_only_for_tests_in_its_scope() -> Result<()> {
 }
 
 #[test]
-#[ignore]
 fn before_each_can_be_declared_multiple_times() -> Result<()> {
     let context = Context::new()?;
     context.write(
         "index.test.ts",
         r#"
             import { assertEq, it, beforeEach, describe } from "str";
-
-            it("outer", () => {});
-
-            describe("scope", () => {
-                beforeEach(() => {
-                    console.error("beforeEach");
-                });
-                it("inner", () => {});
+            let variable;
+            beforeEach(() => {
+                variable = [];
+                variable.push(1);
+            });
+            beforeEach(() => {
+                variable.push(2);
+            });
+            it("works", () => {
+                console.error(variable);
             });
         "#,
     )?;
@@ -228,32 +229,39 @@ fn before_each_can_be_declared_multiple_times() -> Result<()> {
         "index.test.ts",
         0,
         r#"
-            index.test.ts -> outer ...
-            index.test.ts -> outer PASSED
-            index.test.ts -> scope -> inner ...
-            beforeEach
-            index.test.ts -> scope -> inner PASSED
+            index.test.ts -> works ...
+            [ 1, 2 ]
+            index.test.ts -> works PASSED
         "#,
     );
     Ok(())
 }
 
 #[test]
-#[ignore]
 fn before_each_can_be_stacked() -> Result<()> {
     let context = Context::new()?;
     context.write(
         "index.test.ts",
         r#"
             import { assertEq, it, beforeEach, describe } from "str";
-
-            it("outer", () => {});
-
+            let variable;
+            beforeEach(() => {
+                variable = []
+                variable.push("outer beforeEach");
+            });
+            it("outer", () => {
+                console.error(variable);
+            });
             describe("scope", () => {
                 beforeEach(() => {
-                    console.error("beforeEach");
+                    variable.push("inner beforeEach");
                 });
-                it("inner", () => {});
+                it("inner", () => {
+                    console.error(variable);
+                });
+            });
+            it("outer", () => {
+                console.error(variable);
             });
         "#,
     )?;
@@ -262,10 +270,14 @@ fn before_each_can_be_stacked() -> Result<()> {
         0,
         r#"
             index.test.ts -> outer ...
+            [ 'outer beforeEach' ]
             index.test.ts -> outer PASSED
             index.test.ts -> scope -> inner ...
-            beforeEach
+            [ 'outer beforeEach', 'inner beforeEach' ]
             index.test.ts -> scope -> inner PASSED
+            index.test.ts -> outer ...
+            [ 'outer beforeEach' ]
+            index.test.ts -> outer PASSED
         "#,
     );
     Ok(())

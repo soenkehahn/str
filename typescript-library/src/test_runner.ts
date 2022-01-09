@@ -28,12 +28,12 @@ function exhaustivenessCheck(param: never) {}
 
 type TestTree = {
   children: Array<[string, TestItem]>;
-  beforeEach: () => void;
+  beforeEachs: Array<() => void>;
 };
 
 export const newTestTree = (): TestTree => ({
   children: [],
-  beforeEach: () => {},
+  beforeEachs: [],
 });
 
 type TestItem =
@@ -57,7 +57,9 @@ function runTestTreeHelper(
     switch (child.tag) {
       case "it": {
         log(context.stack, "start");
-        tree.beforeEach();
+        for (const f of tree.beforeEachs) {
+          f();
+        }
         try {
           child.test();
           log(context.stack, "passed");
