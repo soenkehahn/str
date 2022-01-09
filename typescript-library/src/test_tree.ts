@@ -25,14 +25,23 @@ type LogKind = "start" | "passed" | "failed";
 function log(testDescription: Array<string>, kind: LogKind) {
   const description = testDescription.join(" -> ");
   let kindSnippet;
-  if (kind === "start") {
-    kindSnippet = "...";
-  } else if (kind === "passed") {
-    kindSnippet = "PASSED";
-  } else if (kind === "failed") {
-    kindSnippet = "FAILED";
-  } else {
-    exhaustivenessCheck(kind);
+  switch (kind) {
+    case "start": {
+      kindSnippet = "...";
+      break;
+    }
+    case "passed": {
+      kindSnippet = "PASSED";
+      break;
+    }
+    case "failed": {
+      kindSnippet = "FAILED";
+      break;
+    }
+    default: {
+      exhaustivenessCheck(kind);
+      break;
+    }
   }
   console.error(`${description} ${kindSnippet}`);
 }
