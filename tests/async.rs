@@ -109,3 +109,32 @@ fn after_each_async() -> Result<()> {
     );
     Ok(())
 }
+
+#[test]
+fn before_all_async() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { it, beforeAll } from "str";
+            let variable;
+            beforeAll(async () => {
+                await null;
+                variable = "set";
+            });
+            it("a", () => {
+                console.error(variable);
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> a ...
+            set
+            index.test.ts -> a PASSED
+        "#,
+    );
+    Ok(())
+}

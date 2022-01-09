@@ -14,6 +14,6 @@ export function afterEach(f: () => void | Promise<void>): void {
   });
 }
 
-export function beforeAll(f: () => void): void {
+export function beforeAll(f: () => void | Promise<void>): void {
   _strTestRunner.stackCurrent().beforeAlls.push(f);
 }
