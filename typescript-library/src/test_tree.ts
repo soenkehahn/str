@@ -4,7 +4,7 @@ export type StrTestRunner = {
   testFile: string | null;
   stack: Array<TestTree>;
   stackCurrent: () => TestTree;
-  finalize: () => void;
+  runTests: () => void;
 };
 
 const newStrTestRunner = (): StrTestRunner =>
@@ -12,7 +12,7 @@ const newStrTestRunner = (): StrTestRunner =>
     testFile: null,
     stack: [newTestTree()],
     stackCurrent: () => result().stack[result().stack.length - 1],
-    finalize: () => {
+    runTests: () => {
       runTestTree(result().testFile, result().stack[0]);
     },
   }));
