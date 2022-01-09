@@ -23,7 +23,7 @@ const newStrTestRunner = (): StrTestRunner => {
   return result;
 };
 
-export type Test = () => void | Promise<void>;
+type Test = () => void | Promise<void>;
 
 type TestTree = {
   children: Array<[string, TestChild]>;
