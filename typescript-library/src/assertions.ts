@@ -1,16 +1,18 @@
-import { _strTestRunner, StrTestFailure, newTestTree } from "./test_runner";
+import {
+  _strTestRunner,
+  StrTestFailure,
+  newTestTree,
+  TestChild,
+} from "./test_runner";
 
 export function describe(description: string, inner: () => void): void {
-  let child = newTestTree();
-  _strTestRunner.stackCurrent().children.push([
-    description,
-    {
-      tag: "describe",
-      tree: child,
-    },
-  ]);
+  let child: TestChild = {
+    tag: "describe",
+    tree: newTestTree(),
+  };
+  _strTestRunner.stackCurrent().children.push([description, child]);
 
-  _strTestRunner.stack.push(child);
+  _strTestRunner.stack.push(child.tree);
   inner();
   _strTestRunner.stack.pop();
 }

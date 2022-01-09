@@ -27,7 +27,7 @@ function log(testDescription: Array<string>, kind: LogKind) {
 function exhaustivenessCheck(param: never) {}
 
 type TestTree = {
-  children: Array<[string, TestItem]>;
+  children: Array<[string, TestChild]>;
   beforeEachs: Array<() => void>;
   beforeAlls: Array<() => void>;
 };
@@ -38,7 +38,7 @@ export const newTestTree = (): TestTree => ({
   beforeAlls: [],
 });
 
-type TestItem =
+export type TestChild =
   | { tag: "it"; test: () => void }
   | { tag: "describe"; tree: TestTree };
 
