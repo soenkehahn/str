@@ -7,6 +7,22 @@ export type StrTestRunner = {
   finalize: () => void;
 };
 
+const newStrTestRunner = (): StrTestRunner =>
+  fix((result: () => StrTestRunner) => ({
+    testFile: null,
+    stack: [newTestTree()],
+    stackCurrent: () => result().stack[result().stack.length - 1],
+    finalize: () => {
+      runTestTree(result().testFile, result().stack[0]);
+    },
+  }));
+
+function fix<T>(construct: (t: () => T) => T): T {
+  let result: T;
+  result = construct(() => result);
+  return result;
+}
+
 type LogKind = "start" | "passed" | "failed";
 
 function log(testDescription: Array<string>, kind: LogKind) {
@@ -91,11 +107,4 @@ function runTestTreeHelper(
   }
 }
 
-export const _strTestRunner: StrTestRunner = {
-  testFile: null,
-  stack: [newTestTree()],
-  stackCurrent: () => _strTestRunner.stack[_strTestRunner.stack.length - 1],
-  finalize: () => {
-    runTestTree(_strTestRunner.testFile, _strTestRunner.stack[0]);
-  },
-};
+export const _strTestRunner: StrTestRunner = newStrTestRunner();
