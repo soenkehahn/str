@@ -13,10 +13,9 @@ func runnerCode(testFile string) string {
 	return dedent.Dedent(fmt.Sprintf(`
 		import { _strTestRunner } from "str";
 		async function main() {
-			_strTestRunner.testDescriptionStack.push("%s");
+			_strTestRunner.testFile = "%s";
 			await import("./%s");
-			_strTestRunner.testDescriptionStack.pop();
-			_strTestRunner.finalize();
+			_strTestRunner.runTests();
 		}
 		main();
 	`, testFile, testFile))

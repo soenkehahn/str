@@ -69,7 +69,10 @@ impl Context {
     pub fn run_assert(&self, file: &str, expected_exit_code: i32, expected_stderr: &str) {
         let output = self.run(file);
         assert_eq!(output.status.code(), Some(expected_exit_code));
-        assert_eq!(output.stderr, expected_stderr.unindent());
+        assert_eq!(
+            output.stderr.lines().collect::<Vec<_>>(),
+            expected_stderr.unindent().lines().collect::<Vec<_>>()
+        );
     }
 
     pub fn run_assert_stderr(&self, file: &str, expected_exit_code: i32) -> String {
