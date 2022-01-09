@@ -496,6 +496,42 @@ fn __dirname_works_as_intended() -> Result<()> {
 }
 
 #[test]
+fn __dirname_works_in_subdirectories() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { it } from "str";
+            import { foo } from "./subdir/foo";
+            it("test", () => {
+                foo();
+            });
+        "#,
+    )?;
+    context.write(
+        "subdir/foo.ts",
+        r#"
+            export function foo() {
+                console.error(`__dirname: ${__dirname}`);
+            }
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        &format!(
+            r#"
+                index.test.ts -> test ...
+                __dirname: {}/subdir
+                index.test.ts -> test PASSED
+            "#,
+            context.temp_dir.path().to_string_lossy(),
+        ),
+    );
+    Ok(())
+}
+
+#[test]
 fn does_not_create_other_files_or_directories() -> Result<()> {
     let context = Context::new()?;
     context.write(

@@ -23,7 +23,7 @@ func onLoad(args api.OnLoadArgs) (api.OnLoadResult, error) {
 	if err != nil {
 		return api.OnLoadResult{}, err
 	}
-	contents := fmt.Sprintf("__dirname = '%s';", __dirname) + string(code)
+	contents := fmt.Sprintf("const __dirname = '%s';", __dirname) + string(code)
 	result := api.OnLoadResult{
 		Contents: &contents,
 		Loader:   pickLoader(args),
