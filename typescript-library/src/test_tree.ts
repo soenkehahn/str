@@ -1,3 +1,6 @@
+import { log } from "./logging";
+import { exhaustivenessCheck } from "./utils";
+
 export class StrTestFailure {}
 
 export type StrTestRunner = {
@@ -20,34 +23,6 @@ const newStrTestRunner = (): StrTestRunner => {
   return result;
 };
 
-type LogKind = "start" | "passed" | "failed";
-
-function log(testDescription: Array<string>, kind: LogKind) {
-  const description = testDescription.join(" -> ");
-  let kindSnippet;
-  switch (kind) {
-    case "start": {
-      kindSnippet = "...";
-      break;
-    }
-    case "passed": {
-      kindSnippet = "PASSED";
-      break;
-    }
-    case "failed": {
-      kindSnippet = "FAILED";
-      break;
-    }
-    default: {
-      exhaustivenessCheck(kind);
-      break;
-    }
-  }
-  console.error(`${description} ${kindSnippet}`);
-}
-
-function exhaustivenessCheck(param: never) {}
-
 type TestTree = {
   children: Array<[string, TestChild]>;
   beforeEachs: Array<() => void>;
@@ -65,27 +40,37 @@ export type TestChild =
   | { tag: "describe"; tree: TestTree };
 
 function runTestTree(fileName: string | null, tree: TestTree) {
-  const context = { stack: fileName ? [fileName] : [], fails: false };
+  const context = {
+    stack: fileName ? [fileName] : [],
+    fails: false,
+    beforeEachsStack: [],
+  };
   runTestTreeHelper(context, tree);
   if (context.fails) {
     process.exit(1);
   }
 }
 
-function runTestTreeHelper(
-  context: { stack: Array<string>; fails: boolean },
-  tree: TestTree
-) {
+type Context = {
+  stack: Array<string>;
+  fails: boolean;
+  beforeEachsStack: Array<Array<() => void>>;
+};
+
+function runTestTreeHelper(context: Context, tree: TestTree) {
   for (const f of tree.beforeAlls) {
     f();
   }
   for (const [testName, child] of tree.children) {
     context.stack.push(testName);
+    context.beforeEachsStack.push(tree.beforeEachs);
     switch (child.tag) {
       case "it": {
         log(context.stack, "start");
-        for (const f of tree.beforeEachs) {
-          f();
+        for (const beforeEachs of context.beforeEachsStack) {
+          for (const f of beforeEachs) {
+            f();
+          }
         }
         try {
           child.test();
@@ -110,6 +95,7 @@ function runTestTreeHelper(
       }
     }
     context.stack.pop();
+    context.beforeEachsStack.pop();
   }
 }
 
