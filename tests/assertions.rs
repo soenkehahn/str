@@ -248,6 +248,7 @@ fn before_each_can_be_stacked() -> Result<()> {
             });
             it("outer", () => {
                 console.error(variable);
+                variable.push("dirty");
             });
             describe("scope", () => {
                 beforeEach(() => {
