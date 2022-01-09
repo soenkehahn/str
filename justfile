@@ -19,6 +19,7 @@ build:
 test *args="": typescript-library-bundle build
   cargo ltest --test basic -- {{ args }}
   cargo ltest --test assertions -- {{ args }}
+  cargo ltest --test async -- {{ args }}
 
 integration: typescript-library-bundle build
   (cargo ltest --test integration -- --test-threads=1)

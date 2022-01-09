@@ -3,6 +3,7 @@ import {
   StrTestFailure,
   newTestTree,
   TestChild,
+  Test,
 } from "./test_tree";
 
 export function describe(description: string, inner: () => void): void {
@@ -17,7 +18,7 @@ export function describe(description: string, inner: () => void): void {
   _strTestRunner.stack.pop();
 }
 
-export function it(testName: string, test: () => void): void {
+export function it(testName: string, test: Test): void {
   _strTestRunner.stackCurrent().children.push([testName, { tag: "it", test }]);
 }
 

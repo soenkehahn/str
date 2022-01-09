@@ -15,7 +15,7 @@ func runnerCode(testFile string) string {
 		async function main() {
 			_strTestRunner.testFile = "%s";
 			await import("./%s");
-			_strTestRunner.runTests();
+			await _strTestRunner.runTests();
 		}
 		main();
 	`, testFile, testFile))

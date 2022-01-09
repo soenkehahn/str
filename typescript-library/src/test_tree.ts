@@ -7,7 +7,7 @@ export type StrTestRunner = {
   testFile: string | null;
   stack: Array<TestTree>;
   stackCurrent: () => TestTree;
-  runTests: () => void;
+  runTests: () => Promise<void>;
 };
 
 const newStrTestRunner = (): StrTestRunner => {
@@ -16,17 +16,19 @@ const newStrTestRunner = (): StrTestRunner => {
     testFile: null,
     stack: [newTestTree()],
     stackCurrent: () => result.stack[result.stack.length - 1],
-    runTests: () => {
-      runTestTree(result.testFile, result.stack[0]);
+    runTests: async () => {
+      await runTestTree(result.testFile, result.stack[0]);
     },
   };
   return result;
 };
 
+export type Test = () => void | Promise<void>;
+
 type TestTree = {
   children: Array<[string, TestChild]>;
   beforeEachs: Array<() => void>;
-  aroundEachs: Array<(test: () => void) => () => void>;
+  aroundEachs: Array<(test: Test) => Test>;
   beforeAlls: Array<() => void>;
 };
 
@@ -38,15 +40,15 @@ export const newTestTree = (): TestTree => ({
 });
 
 export type TestChild =
-  | { tag: "it"; test: () => void }
+  | { tag: "it"; test: Test }
   | { tag: "describe"; tree: TestTree };
 
-function runTestTree(fileName: string | null, tree: TestTree) {
+async function runTestTree(fileName: string | null, tree: TestTree) {
   const context: Context = {
     fails: false,
     stack: fileName ? [{ description: fileName, aroundEachs: [] }] : [],
   };
-  runTestTreeHelper(context, tree);
+  await runTestTreeHelper(context, tree);
   if (context.fails) {
     process.exit(1);
   }
@@ -56,11 +58,14 @@ type Context = {
   fails: boolean;
   stack: Array<{
     description: string;
-    aroundEachs: Array<(test: () => void) => () => void>;
+    aroundEachs: Array<(test: Test) => Test>;
   }>;
 };
 
-function runTestTreeHelper(context: Context, tree: TestTree) {
+async function runTestTreeHelper(
+  context: Context,
+  tree: TestTree
+): Promise<void> {
   for (const f of tree.beforeAlls) {
     f();
   }
@@ -80,7 +85,7 @@ function runTestTreeHelper(context: Context, tree: TestTree) {
               test = aroundEach(test);
             }
           }
-          test();
+          await test();
           log(context.stack, "passed");
         } catch (exception) {
           if (exception instanceof StrTestFailure) {
@@ -93,7 +98,7 @@ function runTestTreeHelper(context: Context, tree: TestTree) {
         break;
       }
       case "describe": {
-        runTestTreeHelper(context, child.tree);
+        await runTestTreeHelper(context, child.tree);
         break;
       }
       default: {
