@@ -7,21 +7,18 @@ export type StrTestRunner = {
   runTests: () => void;
 };
 
-const newStrTestRunner = (): StrTestRunner =>
-  fix((result: () => StrTestRunner) => ({
+const newStrTestRunner = (): StrTestRunner => {
+  let result: StrTestRunner;
+  result = {
     testFile: null,
     stack: [newTestTree()],
-    stackCurrent: () => result().stack[result().stack.length - 1],
+    stackCurrent: () => result.stack[result.stack.length - 1],
     runTests: () => {
-      runTestTree(result().testFile, result().stack[0]);
+      runTestTree(result.testFile, result.stack[0]);
     },
-  }));
-
-function fix<T>(construct: (t: () => T) => T): T {
-  let result: T;
-  result = construct(() => result);
+  };
   return result;
-}
+};
 
 type LogKind = "start" | "passed" | "failed";
 
