@@ -282,6 +282,184 @@ fn before_each_can_be_stacked() -> Result<()> {
 }
 
 #[test]
+fn before_each_on_the_top_level_will_be_run_for_every_nested_test() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { it, beforeEach, describe } from "str";
+            let variable;
+            beforeEach(() => {
+                variable = [];
+                variable.push("outer beforeEach");
+            });
+            describe("nested", () => {
+                beforeEach(() => variable.push("inner beforeEach"));
+                it("inner", () => {
+                    console.error(variable);
+                    variable.push("dirty");
+                });
+                it("inner", () => console.error(variable));
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> nested -> inner ...
+            [ 'outer beforeEach', 'inner beforeEach' ]
+            index.test.ts -> nested -> inner PASSED
+            index.test.ts -> nested -> inner ...
+            [ 'outer beforeEach', 'inner beforeEach' ]
+            index.test.ts -> nested -> inner PASSED
+        "#,
+    );
+    Ok(())
+}
+
+#[test]
+fn after_each_simple() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { it, beforeEach, afterEach } from "str";
+            let counter = 0;
+            beforeEach(() => {
+                counter++;
+            });
+            afterEach(() => {
+                counter--;
+            });
+            it("a", () => {
+                console.error(counter);
+            });
+            it("b", () => {
+                console.error(counter);
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> a ...
+            1
+            index.test.ts -> a PASSED
+            index.test.ts -> b ...
+            1
+            index.test.ts -> b PASSED
+        "#,
+    );
+    Ok(())
+}
+
+#[test]
+fn after_each_can_be_declared_multiple_times() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { it, beforeEach, afterEach } from "str";
+            let counter = 0;
+            beforeEach(() => {
+                counter += 2;
+            });
+            afterEach(() => {
+                counter--;
+            });
+            afterEach(() => {
+                counter--;
+            });
+            it("a", () => {
+                console.error(counter);
+            });
+            it("b", () => {
+                console.error(counter);
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> a ...
+            2
+            index.test.ts -> a PASSED
+            index.test.ts -> b ...
+            2
+            index.test.ts -> b PASSED
+        "#,
+    );
+    Ok(())
+}
+
+#[test]
+fn after_each_when_nested_is_executed_bottom_up() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { it, beforeEach, afterEach, describe } from "str";
+            let outer;
+            beforeEach(() => {
+                outer = "outer set";
+            });
+            afterEach(() => {
+                console.error(`outer afterEach: ${JSON.stringify({outer})}, typeof inner: ${typeof inner}`);
+                outer = null;
+            });
+            describe("nested", () => {
+                let inner;
+                beforeEach(() => {
+                    inner = "inner set";
+                });
+                afterEach(() => {
+                    console.error(`inner afterEach: ${JSON.stringify({outer, inner})}`);
+                    inner = "empty and dirty";
+                });
+                it("test", () => {});
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> nested -> test ...
+            inner afterEach: {"outer":"outer set","inner":"inner set"}
+            outer afterEach: {"outer":"outer set"}, typeof inner: undefined
+            index.test.ts -> nested -> test PASSED
+        "#,
+    );
+    Ok(())
+}
+
+#[test]
+fn after_each_can_be_declared_later() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { it, beforeEach, afterEach, describe } from "str";
+            it("test", () => {});
+            afterEach(() => console.error("afterEach"));
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> test ...
+            afterEach
+            index.test.ts -> test PASSED
+        "#,
+    );
+    Ok(())
+}
+
+#[test]
 fn before_all_runs_before_all_tests_once() -> Result<()> {
     let context = Context::new()?;
     context.write(

@@ -2,8 +2,8 @@ import { exhaustivenessCheck } from "./utils";
 
 export type LogKind = "start" | "passed" | "failed";
 
-export function log(testDescription: Array<string>, kind: LogKind) {
-  const description = testDescription.join(" -> ");
+export function log(stack: Array<{ description: string }>, kind: LogKind) {
+  const description = stack.map((x) => x.description).join(" -> ");
   let kindSnippet;
   switch (kind) {
     case "start": {

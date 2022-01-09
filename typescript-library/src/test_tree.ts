@@ -26,12 +26,14 @@ const newStrTestRunner = (): StrTestRunner => {
 type TestTree = {
   children: Array<[string, TestChild]>;
   beforeEachs: Array<() => void>;
+  aroundEachs: Array<(test: () => void) => () => void>;
   beforeAlls: Array<() => void>;
 };
 
 export const newTestTree = (): TestTree => ({
   children: [],
   beforeEachs: [],
+  aroundEachs: [],
   beforeAlls: [],
 });
 
@@ -40,10 +42,9 @@ export type TestChild =
   | { tag: "describe"; tree: TestTree };
 
 function runTestTree(fileName: string | null, tree: TestTree) {
-  const context = {
-    stack: fileName ? [fileName] : [],
+  const context: Context = {
     fails: false,
-    beforeEachsStack: [],
+    stack: fileName ? [{ description: fileName, aroundEachs: [] }] : [],
   };
   runTestTreeHelper(context, tree);
   if (context.fails) {
@@ -52,9 +53,11 @@ function runTestTree(fileName: string | null, tree: TestTree) {
 }
 
 type Context = {
-  stack: Array<string>;
   fails: boolean;
-  beforeEachsStack: Array<Array<() => void>>;
+  stack: Array<{
+    description: string;
+    aroundEachs: Array<(test: () => void) => () => void>;
+  }>;
 };
 
 function runTestTreeHelper(context: Context, tree: TestTree) {
@@ -62,18 +65,22 @@ function runTestTreeHelper(context: Context, tree: TestTree) {
     f();
   }
   for (const [testName, child] of tree.children) {
-    context.stack.push(testName);
-    context.beforeEachsStack.push(tree.beforeEachs);
+    context.stack.push({
+      description: testName,
+      aroundEachs: tree.aroundEachs,
+    });
     switch (child.tag) {
       case "it": {
         log(context.stack, "start");
-        for (const beforeEachs of context.beforeEachsStack) {
-          for (const f of beforeEachs) {
-            f();
-          }
-        }
         try {
-          child.test();
+          let test = child.test;
+          for (let i = context.stack.length - 1; i >= 0; i--) {
+            const aroundEachs = context.stack[i].aroundEachs;
+            for (const aroundEach of aroundEachs) {
+              test = aroundEach(test);
+            }
+          }
+          test();
           log(context.stack, "passed");
         } catch (exception) {
           if (exception instanceof StrTestFailure) {
@@ -95,7 +102,6 @@ function runTestTreeHelper(context: Context, tree: TestTree) {
       }
     }
     context.stack.pop();
-    context.beforeEachsStack.pop();
   }
 }
 

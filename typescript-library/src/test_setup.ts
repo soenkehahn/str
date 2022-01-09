@@ -1,9 +1,19 @@
 import { _strTestRunner } from ".";
 
-export function beforeAll(f: () => void): void {
-  _strTestRunner.stackCurrent().beforeAlls.push(f);
+export function beforeEach(f: () => void): void {
+  _strTestRunner.stackCurrent().aroundEachs.unshift((test) => () => {
+    f();
+    test();
+  });
 }
 
-export function beforeEach(f: () => void): void {
-  _strTestRunner.stackCurrent().beforeEachs.push(f);
+export function afterEach(f: () => void): void {
+  _strTestRunner.stackCurrent().aroundEachs.push((test) => () => {
+    test();
+    f();
+  });
+}
+
+export function beforeAll(f: () => void): void {
+  _strTestRunner.stackCurrent().beforeAlls.push(f);
 }
