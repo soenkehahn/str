@@ -322,22 +322,18 @@ fn before_all_runs_before_all_tests_once() -> Result<()> {
 }
 
 #[test]
-#[ignore]
 fn before_all_runs_before_all_tests_when_declared_later() -> Result<()> {
     let context = Context::new()?;
     context.write(
         "index.test.ts",
         r#"
             import { assertEq, it, beforeAll } from "str";
-
             let variable;
-
             it("a", () => {
                 console.error(variable);
             });
-
             beforeAll(() => {
-                counter = "set";
+                variable = "set";
             });
         "#,
     )?;
@@ -354,26 +350,64 @@ fn before_all_runs_before_all_tests_when_declared_later() -> Result<()> {
 }
 
 #[test]
-#[ignore]
 fn before_all_is_run_only_for_tests_in_its_scope() -> Result<()> {
     let context = Context::new()?;
     context.write(
         "index.test.ts",
         r#"
-            import { assertEq, it, beforeEach } from "str";
-
-            let test_variable;
-            it("works", () => {
-                console.error(test_variable);
-                test_variable = "dirty";
+            import { it, describe, beforeAll } from "str";
+            let variable = "outer value";
+            it("outer", () => {
+                console.error(variable);
+                variable = "dirty";
             });
-
-            it("works", () => {
-                console.error(test_variable);
+            describe("description", () => {
+                beforeAll(() => {
+                    variable = "inner value";
+                });
+                it("inner", () => {
+                    console.error(variable);
+                });
             });
+            it("outer", () => {
+                console.error(variable);
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> outer ...
+            outer value
+            index.test.ts -> outer PASSED
+            index.test.ts -> description -> inner ...
+            inner value
+            index.test.ts -> description -> inner PASSED
+            index.test.ts -> outer ...
+            inner value
+            index.test.ts -> outer PASSED
+        "#,
+    );
+    Ok(())
+}
 
-            beforeEach(() => {
-                test_variable = "set";
+#[test]
+fn before_all_can_be_declared_multiple_times() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { it, beforeAll } from "str";
+            let variable = [];
+            beforeAll(() => {
+                variable.push(1);
+            });
+            beforeAll(() => {
+                variable.push(2);
+            });
+            it("works", () => {
+                console.error(variable);
             });
         "#,
     )?;
@@ -382,10 +416,7 @@ fn before_all_is_run_only_for_tests_in_its_scope() -> Result<()> {
         0,
         r#"
             index.test.ts -> works ...
-            set
-            index.test.ts -> works PASSED
-            index.test.ts -> works ...
-            set
+            [ 1, 2 ]
             index.test.ts -> works PASSED
         "#,
     );
