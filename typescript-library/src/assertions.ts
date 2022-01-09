@@ -3,7 +3,7 @@ import {
   StrTestFailure,
   newTestTree,
   TestChild,
-} from "./test_runner";
+} from "./test_tree";
 
 export function describe(description: string, inner: () => void): void {
   let child: TestChild = {
