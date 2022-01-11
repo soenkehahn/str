@@ -556,7 +556,6 @@ fn node_apis() -> Result<()> {
     context.write(
         "index.test.ts",
         r#"
-            import { assertEq, it } from "str";
             import { basename } from "path";
             console.error(basename("dir/file"));
         "#,
