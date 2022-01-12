@@ -9,8 +9,11 @@ export function beforeEach(f: () => void | Promise<void>): void {
 
 export function afterEach(f: () => void | Promise<void>): void {
   _strTestRunner.stackCurrent().aroundEachs.push((test) => async () => {
-    await test();
-    await f();
+    try {
+      await test();
+    } finally {
+      await f();
+    }
   });
 }
 

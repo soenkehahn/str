@@ -1,3 +1,4 @@
+- set up eslint
 - setup tsc for example
 - Set up CI for different node versions
 - Show statistics of failing and passing tests at the end

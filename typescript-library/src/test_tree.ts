@@ -28,7 +28,7 @@ type Test = () => void | Promise<void>;
 type TestTree = {
   children: Array<[string, TestChild]>;
   beforeEachs: Array<() => void>;
-  aroundEachs: Array<(test: Test) => Test>;
+  aroundEachs: Array<(test: Test) => () => Promise<void>>;
   beforeAlls: Array<() => void | Promise<void>>;
 };
 
@@ -58,7 +58,7 @@ type Context = {
   fails: boolean;
   stack: Array<{
     description: string;
-    aroundEachs: Array<(test: Test) => Test>;
+    aroundEachs: Array<(test: Test) => () => Promise<void>>;
   }>;
 };
 
@@ -78,7 +78,16 @@ async function runTestTreeHelper(
       case "it": {
         log(context.stack, "start");
         try {
-          let test = child.test;
+          let test = async () => {
+            try {
+              return await child.test();
+            } catch (exception) {
+              if (!(exception instanceof StrTestFailure)) {
+                console.error(`EXCEPTION: ${exception}`);
+              }
+              throw exception;
+            }
+          };
           for (let i = context.stack.length - 1; i >= 0; i--) {
             const aroundEachs = context.stack[i].aroundEachs;
             for (const aroundEach of aroundEachs) {
@@ -88,14 +97,8 @@ async function runTestTreeHelper(
           await test();
           log(context.stack, "passed");
         } catch (exception) {
-          if (exception instanceof StrTestFailure) {
-            log(context.stack, "failed");
-            context.fails = true;
-          } else {
-            console.error(`EXCEPTION: ${exception}`);
-            log(context.stack, "failed");
-            context.fails = true;
-          }
+          log(context.stack, "failed");
+          context.fails = true;
         }
         break;
       }
