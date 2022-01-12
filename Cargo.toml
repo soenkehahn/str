@@ -4,8 +4,10 @@ version = "0.0.0"
 edition = "2021"
 
 [dev-dependencies]
-cradle = "*"
 anyhow = "*"
-tempfile = "*"
+colored = "2.0.0"
+cradle = "*"
 pretty_assertions = "*"
+strip-ansi-escapes = "0.1.1"
+tempfile = "*"
 unindent = "*"

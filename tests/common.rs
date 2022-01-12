@@ -66,13 +66,32 @@ impl Context {
         o
     }
 
-    pub fn run_assert(&self, file: &str, expected_exit_code: i32, expected_stderr: &str) {
-        let output = self.run(file);
-        assert_eq!(output.status.code(), Some(expected_exit_code));
+    pub fn run_assert(
+        &self,
+        file: &str,
+        expected_exit_code: i32,
+        expected_stderr: &str,
+    ) -> Result<()> {
+        let stderr = self.run_assert_stderr(file, expected_exit_code);
         assert_eq!(
-            output.stderr.lines().collect::<Vec<_>>(),
+            strip_ansi(&stderr)?.lines().collect::<Vec<_>>(),
             expected_stderr.unindent().lines().collect::<Vec<_>>()
         );
+        Ok(())
+    }
+
+    pub fn run_assert_with_colors(
+        &self,
+        file: &str,
+        expected_exit_code: i32,
+        expected_stderr: &str,
+    ) -> Result<()> {
+        let stderr = self.run_assert_stderr(file, expected_exit_code);
+        assert_eq!(
+            stderr.lines().collect::<Vec<_>>(),
+            expected_stderr.unindent().lines().collect::<Vec<_>>()
+        );
+        Ok(())
     }
 
     pub fn run_assert_stderr(&self, file: &str, expected_exit_code: i32) -> String {
@@ -85,4 +104,8 @@ impl Context {
 pub struct Output {
     status: ExitStatus,
     stderr: String,
+}
+
+pub fn strip_ansi(input: &str) -> Result<String> {
+    Ok(String::from_utf8(strip_ansi_escapes::strip(input)?)?)
 }

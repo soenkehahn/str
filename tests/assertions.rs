@@ -24,7 +24,7 @@ fn describe_simple() -> Result<()> {
             index.test.ts -> description -> works ...
             index.test.ts -> description -> works PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -69,7 +69,7 @@ fn describe_bigger() -> Result<()> {
             false
             index.test.ts -> fails FAILED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -102,7 +102,7 @@ fn describe_pops_description_stack_correctly_after_failures() -> Result<()> {
             index.test.ts -> works ...
             index.test.ts -> works PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -137,7 +137,7 @@ fn before_each_is_run_before_every_test() -> Result<()> {
             set
             index.test.ts -> works PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -165,7 +165,7 @@ fn before_each_works_when_declared_later() -> Result<()> {
             set
             index.test.ts -> works PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -198,7 +198,7 @@ fn before_each_is_run_only_for_tests_in_its_scope() -> Result<()> {
             index.test.ts -> outer ...
             index.test.ts -> outer PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -230,7 +230,7 @@ fn before_each_can_be_declared_multiple_times() -> Result<()> {
             [ 1, 2 ]
             index.test.ts -> works PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -277,7 +277,7 @@ fn before_each_can_be_stacked() -> Result<()> {
             [ 'outer beforeEach' ]
             index.test.ts -> outer PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -314,7 +314,7 @@ fn before_each_on_the_top_level_will_be_run_for_every_nested_test() -> Result<()
             [ 'outer beforeEach', 'inner beforeEach' ]
             index.test.ts -> nested -> inner PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -351,7 +351,7 @@ fn after_each_simple() -> Result<()> {
             1
             index.test.ts -> b PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -391,7 +391,7 @@ fn after_each_can_be_declared_multiple_times() -> Result<()> {
             2
             index.test.ts -> b PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -432,7 +432,7 @@ fn after_each_when_nested_is_executed_bottom_up() -> Result<()> {
             outer afterEach: {"outer":"outer set"}, typeof inner: undefined
             index.test.ts -> nested -> test PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -455,7 +455,7 @@ fn after_each_can_be_declared_later() -> Result<()> {
             afterEach
             index.test.ts -> test PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -489,7 +489,7 @@ fn before_all_runs_before_all_tests_once() -> Result<()> {
             1
             index.test.ts -> b PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -517,7 +517,7 @@ fn before_all_runs_before_all_tests_when_declared_later() -> Result<()> {
             set
             index.test.ts -> a PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -560,7 +560,7 @@ fn before_all_is_run_only_for_tests_in_its_scope() -> Result<()> {
             inner value
             index.test.ts -> outer PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -591,6 +591,6 @@ fn before_all_can_be_declared_multiple_times() -> Result<()> {
             [ 1, 2 ]
             index.test.ts -> works PASSED
         "#,
-    );
+    )?;
     Ok(())
 }

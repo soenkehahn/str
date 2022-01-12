@@ -28,7 +28,7 @@ fn simple_test_failure() -> Result<()> {
             false
             src/index.test.ts -> fails FAILED
         ",
-    );
+    )?;
     Ok(())
 }
 
@@ -51,7 +51,7 @@ fn simple_test_success() -> Result<()> {
             src/index.test.ts -> works ...
             src/index.test.ts -> works PASSED
         ",
-    );
+    )?;
     Ok(())
 }
 
@@ -75,7 +75,7 @@ fn typescript_gets_compiled_to_javascript() -> Result<()> {
             src/index.test.ts -> works ...
             src/index.test.ts -> works PASSED
         ",
-    );
+    )?;
     Ok(())
 }
 
@@ -105,7 +105,7 @@ fn multiple_tests_passing() -> Result<()> {
             src/index.test.ts -> works too ...
             src/index.test.ts -> works too PASSED
         ",
-    );
+    )?;
     Ok(())
 }
 
@@ -138,7 +138,7 @@ fn multiple_tests_last_failing() -> Result<()> {
             false
             src/index.test.ts -> fails FAILED
         ",
-    );
+    )?;
     Ok(())
 }
 
@@ -149,11 +149,9 @@ fn multiple_tests_first_failing() -> Result<()> {
         "src/index.test.ts",
         r#"
             import { assertEq, it } from "str";
-
             it("fails", () => {
                 assertEq(true, false);
             });
-
             it("works", () => {
                 assertEq(true, true);
             });
@@ -171,7 +169,7 @@ fn multiple_tests_first_failing() -> Result<()> {
             src/index.test.ts -> works ...
             src/index.test.ts -> works PASSED
         ",
-    );
+    )?;
     Ok(())
 }
 
@@ -182,11 +180,9 @@ fn multiple_failing_tests() -> Result<()> {
         "src/index.test.ts",
         r#"
             import { assertEq, it } from "str";
-
             it("fails", () => {
                 assertEq(true, false);
             });
-
             it("fails too", () => {
                 assertEq(true, false);
             });
@@ -207,7 +203,7 @@ fn multiple_failing_tests() -> Result<()> {
             false
             src/index.test.ts -> fails too FAILED
         ",
-    );
+    )?;
     Ok(())
 }
 
@@ -238,7 +234,7 @@ fn jsx_and_tsx() -> Result<()> {
             src/index.test.tsx -> works ...
             src/index.test.tsx -> works PASSED
         ",
-    );
+    )?;
     Ok(())
 }
 
@@ -270,7 +266,7 @@ fn local_imports() -> Result<()> {
             index.test.ts -> works ...
             index.test.ts -> works PASSED
         ",
-    );
+    )?;
     Ok(())
 }
 
@@ -302,7 +298,7 @@ fn local_imports_with_tsx_extension() -> Result<()> {
             index.test.ts -> works ...
             index.test.ts -> works PASSED
         ",
-    );
+    )?;
     Ok(())
 }
 
@@ -334,7 +330,7 @@ fn local_imports_in_subdirectories() -> Result<()> {
             index.test.ts -> works ...
             index.test.ts -> works PASSED
         ",
-    );
+    )?;
     Ok(())
 }
 
@@ -366,7 +362,7 @@ fn local_imports_of_index_files() -> Result<()> {
             index.test.ts -> works ...
             index.test.ts -> works PASSED
         ",
-    );
+    )?;
     Ok(())
 }
 
@@ -464,7 +460,7 @@ fn reexport_ts_types() -> Result<()> {
             index.test.ts -> works ...
             index.test.ts -> works PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -491,7 +487,7 @@ fn __dirname_works_as_intended() -> Result<()> {
             "#,
             context.temp_dir.path().to_string_lossy(),
         ),
-    );
+    )?;
     Ok(())
 }
 
@@ -527,7 +523,7 @@ fn __dirname_works_in_subdirectories() -> Result<()> {
             "#,
             context.temp_dir.path().to_string_lossy(),
         ),
-    );
+    )?;
     Ok(())
 }
 
@@ -566,6 +562,6 @@ fn node_apis() -> Result<()> {
         "
             file
         ",
-    );
+    )?;
     Ok(())
 }

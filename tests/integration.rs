@@ -1,4 +1,7 @@
+mod common;
+
 use anyhow::Result;
+use common::strip_ansi;
 use cradle::prelude::*;
 use pretty_assertions::assert_eq;
 use unindent::Unindent;
@@ -33,7 +36,7 @@ fn integration_test() -> Result<()> {
     let (Status(status), Stderr(output)) = run_command(&image, "failing.test.ts").run_result()?;
     assert_eq!(status.code(), Some(1));
     assert_eq!(
-        output,
+        strip_ansi(&output)?,
         "
             failing.test.ts -> fails ...
             true
@@ -46,7 +49,7 @@ fn integration_test() -> Result<()> {
     let (Status(status), Stderr(output)) = run_command(&image, "passing.test.ts").run_result()?;
     assert!(status.success());
     assert_eq!(
-        output,
+        strip_ansi(&output)?,
         "
             passing.test.ts -> passes ...
             passing.test.ts -> passes PASSED

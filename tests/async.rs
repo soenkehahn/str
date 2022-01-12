@@ -24,7 +24,7 @@ fn it_async() -> Result<()> {
             async
             index.test.ts -> works PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -51,7 +51,7 @@ fn it_with_async_failure() -> Result<()> {
             false
             index.test.ts -> fails FAILED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -80,7 +80,7 @@ fn before_each_async() -> Result<()> {
             set
             index.test.ts -> a PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -106,7 +106,7 @@ fn after_each_async() -> Result<()> {
             async afterEach
             index.test.ts -> a PASSED
         "#,
-    );
+    )?;
     Ok(())
 }
 
@@ -135,6 +135,6 @@ fn before_all_async() -> Result<()> {
             set
             index.test.ts -> a PASSED
         "#,
-    );
+    )?;
     Ok(())
 }

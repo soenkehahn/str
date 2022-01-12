@@ -26,7 +26,7 @@ fn it_catches_exceptions() -> Result<()> {
             index.test.ts -> b ...
             index.test.ts -> b PASSED
         ",
-    );
+    )?;
     Ok(())
 }
 
@@ -53,6 +53,6 @@ fn it_catches_undefined_identifiers() -> Result<()> {
             index.test.ts -> b ...
             index.test.ts -> b PASSED
         ",
-    );
+    )?;
     Ok(())
 }

@@ -21,6 +21,7 @@ test *args="": typescript-library-bundle build
   cargo ltest --test assertions -- {{ args }}
   cargo ltest --test async -- {{ args }}
   cargo ltest --test exceptions -- {{ args }}
+  cargo ltest --test colors -- {{ args }}
 
 integration: typescript-library-bundle build
   (cargo ltest --test integration -- --test-threads=1)
