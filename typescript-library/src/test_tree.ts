@@ -92,7 +92,9 @@ async function runTestTreeHelper(
             log(context.stack, "failed");
             context.fails = true;
           } else {
-            throw exception;
+            console.error(`EXCEPTION: ${exception}`);
+            log(context.stack, "failed");
+            context.fails = true;
           }
         }
         break;

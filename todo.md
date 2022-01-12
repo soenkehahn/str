@@ -1,7 +1,7 @@
-- setup tsc for example
-- Set up CI for different node versions
 - Catch exceptions during tests
   - and pop the description stack
+- setup tsc for example
+- Set up CI for different node versions
 - Show statistics of failing and passing tests at the end
 - Nice colors in output
 - Allow test-suites in nested directories
