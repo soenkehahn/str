@@ -107,12 +107,37 @@ fn after_each_gets_run_when_it_throws() -> Result<()> {
         1,
         "
             index.test.ts -> a ...
-            EXCEPTION: ReferenceError: notDefined is not defined
             afterEach
+            EXCEPTION: ReferenceError: notDefined is not defined
             index.test.ts -> a FAILED
             index.test.ts -> b ...
             afterEach
             index.test.ts -> b PASSED
+        ",
+    )?;
+    Ok(())
+}
+
+#[test]
+fn prints_exceptions_in_before_eachs() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { it, beforeEach } from "str";
+            beforeEach(() => {
+                throw "test error";
+            });
+            it("a", () => {});
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        1,
+        "
+            index.test.ts -> a ...
+            EXCEPTION: test error
+            index.test.ts -> a FAILED
         ",
     )?;
     Ok(())

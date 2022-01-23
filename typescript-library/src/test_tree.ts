@@ -78,16 +78,7 @@ async function runTestTreeHelper(
       case "it": {
         log(context.stack, "start");
         try {
-          let test = async () => {
-            try {
-              return await child.test();
-            } catch (exception) {
-              if (!(exception instanceof StrTestFailure)) {
-                console.error(`EXCEPTION: ${exception}`);
-              }
-              throw exception;
-            }
-          };
+          let test = child.test;
           for (let i = context.stack.length - 1; i >= 0; i--) {
             const aroundEachs = context.stack[i].aroundEachs;
             for (const aroundEach of aroundEachs) {
@@ -97,6 +88,9 @@ async function runTestTreeHelper(
           await test();
           log(context.stack, "passed");
         } catch (exception) {
+          if (!(exception instanceof StrTestFailure)) {
+            console.error(`EXCEPTION: ${exception}`);
+          }
           log(context.stack, "failed");
           context.fails = true;
         }
