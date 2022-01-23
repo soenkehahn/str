@@ -7,8 +7,8 @@ import (
 )
 
 func main() {
-	testFile := os.Args[1]
-	exitCode, err := cli.RunTestFile(testFile)
+	testFiles := os.Args[1:]
+	exitCode, err := cli.Run(testFiles)
 	if err != nil {
 		if _, ok := err.(*cli.BundleError); ok {
 			os.Exit(1)
