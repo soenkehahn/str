@@ -54,8 +54,11 @@ impl Context {
         Ok(())
     }
 
-    pub fn run(&self, file: &str) -> Output {
-        let (Stderr(stderr), Status(status)) = self.run_command((self.repo_dir.join("str"), file));
+    pub fn run(&self, args: &str) -> Output {
+        let (Stderr(stderr), Status(status)) = self.run_command((
+            self.repo_dir.join("str"),
+            args.split_whitespace().collect::<Vec<&str>>(),
+        ));
         eprintln!("STDERR:\n{}STDERR END", stderr);
         Output { status, stderr }
     }
@@ -68,11 +71,11 @@ impl Context {
 
     pub fn run_assert(
         &self,
-        file: &str,
+        args: &str,
         expected_exit_code: i32,
         expected_stderr: &str,
     ) -> Result<()> {
-        let stderr = self.run_assert_stderr(file, expected_exit_code);
+        let stderr = self.run_assert_stderr(args, expected_exit_code);
         assert_eq!(
             strip_ansi(&stderr)?.lines().collect::<Vec<_>>(),
             expected_stderr.unindent().lines().collect::<Vec<_>>()
@@ -82,11 +85,11 @@ impl Context {
 
     pub fn run_assert_with_colors(
         &self,
-        file: &str,
+        args: &str,
         expected_exit_code: i32,
         expected_stderr: &str,
     ) -> Result<()> {
-        let stderr = self.run_assert_stderr(file, expected_exit_code);
+        let stderr = self.run_assert_stderr(args, expected_exit_code);
         assert_eq!(
             stderr.lines().collect::<Vec<_>>(),
             expected_stderr.unindent().lines().collect::<Vec<_>>()
@@ -94,8 +97,8 @@ impl Context {
         Ok(())
     }
 
-    pub fn run_assert_stderr(&self, file: &str, expected_exit_code: i32) -> String {
-        let output = self.run(file);
+    pub fn run_assert_stderr(&self, args: &str, expected_exit_code: i32) -> String {
+        let output = self.run(args);
         assert_eq!(output.status.code(), Some(expected_exit_code));
         output.stderr
     }

@@ -21,19 +21,46 @@ func runnerCode(testFile string) string {
 	`, testFile, testFile))
 }
 
-func RunTestFile(testFile string) (int, error) {
-	strDistDir, err := os.MkdirTemp("", "str-bundle")
+type runner struct {
+	failed bool
+}
+
+func Run(testFiles []string) (int, error) {
+	runner := runner{}
+	err := runner.runTestFiles(testFiles)
 	if err != nil {
 		return 1, err
+	}
+	if runner.failed {
+		return 1, nil
+	} else {
+		return 0, nil
+	}
+}
+
+func (runner *runner) runTestFiles(testFiles []string) error {
+	for _, testFile := range testFiles {
+		err := runner.runTestFile(testFile)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (runner *runner) runTestFile(testFile string) error {
+	strDistDir, err := os.MkdirTemp("", "str-bundle")
+	if err != nil {
+		return err
 	}
 	defer os.RemoveAll(strDistDir)
 	os.Mkdir(strDistDir, 0755)
 	bundleFile := strDistDir + "/main.js"
 	err = bundle(runnerCode(testFile), bundleFile)
 	if err != nil {
-		return 1, err
+		return err
 	}
-	return runBundle(bundleFile)
+	return runner.runBundle(bundleFile)
 }
 
 func writeFile(file string, content string) error {
@@ -49,7 +76,7 @@ func writeFile(file string, content string) error {
 	return nil
 }
 
-func runBundle(bundleFile string) (int, error) {
+func (runner *runner) runBundle(bundleFile string) error {
 	command := exec.Command("node", bundleFile)
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
@@ -57,13 +84,16 @@ func runBundle(bundleFile string) (int, error) {
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			if status, ok := exitErr.Sys().(syscall.WaitStatus); ok {
-				return status.ExitStatus(), nil
+				if status.ExitStatus() != 0 {
+					runner.failed = true
+				}
+				return nil
 			} else {
-				return 1, exitErr
+				return exitErr
 			}
 		} else {
-			return 1, exitErr
+			return exitErr
 		}
 	}
-	return 0, nil
+	return nil
 }
