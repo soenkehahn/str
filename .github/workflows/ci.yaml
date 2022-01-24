@@ -22,7 +22,7 @@ jobs:
           curl https://go.dev/dl/go1.17.6.linux-amd64.tar.gz -LO
           mkdir -p ~/go
           ls -la
-          tar -C ~/go -xzf go1.17.6.linux-amd64.tar.gz
+          tar -C ~ -xzf go1.17.6.linux-amd64.tar.gz
           ls -la ~/go
           ls -la ~/go/bin
           echo ~/go/bin > $GITHUB_PATH
