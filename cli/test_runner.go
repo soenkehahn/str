@@ -9,16 +9,21 @@ import (
 	"github.com/lithammer/dedent"
 )
 
-func runnerCode(testFile string) string {
-	return dedent.Dedent(fmt.Sprintf(`
-		import { _strTestRunner } from "str";
-		async function main() {
-			_strTestRunner.testFile = "%s";
-			await import("./%s");
+func runnerCode(testFiles []string) string {
+	code := `
+		import { _strTestRunner, describe } from "str";
+		async function main() {`
+	for _, testFile := range testFiles {
+		code += fmt.Sprintf(`
+			await _strTestRunner.enterTestFile("%s", () => import("./%s"));`,
+			testFile, testFile)
+	}
+	code += `
 			await _strTestRunner.runTests();
 		}
 		main();
-	`, testFile, testFile))
+	`
+	return dedent.Dedent(code)
 }
 
 type runner struct {
@@ -39,16 +44,6 @@ func Run(testFiles []string) (int, error) {
 }
 
 func (runner *runner) runTestFiles(testFiles []string) error {
-	for _, testFile := range testFiles {
-		err := runner.runTestFile(testFile)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (runner *runner) runTestFile(testFile string) error {
 	strDistDir, err := os.MkdirTemp("", "str-bundle")
 	if err != nil {
 		return err
@@ -56,7 +51,7 @@ func (runner *runner) runTestFile(testFile string) error {
 	defer os.RemoveAll(strDistDir)
 	os.Mkdir(strDistDir, 0755)
 	bundleFile := strDistDir + "/main.js"
-	err = bundle(runnerCode(testFile), bundleFile)
+	err = bundle(runnerCode(testFiles), bundleFile)
 	if err != nil {
 		return err
 	}
