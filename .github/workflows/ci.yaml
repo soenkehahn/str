@@ -21,7 +21,6 @@ jobs:
         run: |
           curl https://go.dev/dl/go1.17.6.linux-amd64.tar.gz -LO
           tar -C ~ -xzf go1.17.6.linux-amd64.tar.gz
-          echo ~/go/bin > $GITHUB_PATH
       - uses: actions/checkout@v2
       - name: CI
         run: just ci
