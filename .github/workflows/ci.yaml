@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - "*"
+  push:
+    branches:
+      - master
+
+jobs:
+  all:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install just
+        uses: extractions/setup-just@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install go
+        run: |
+          curl https://go.dev/dl/go1.17.6.linux-amd64.tar.gz -LO
+          tar -C ~ -xzf go1.17.6.linux-amd64.tar.gz
+          echo ~/go/bin > $GITHUB_PATH
+      - uses: actions/checkout@v2
+      - name: CI
+        run: just ci
