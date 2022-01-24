@@ -1,4 +1,4 @@
-import { log } from "./logging";
+import { log, logSummary } from "./logging";
 import { exhaustivenessCheck } from "./utils";
 
 export class StrTestFailure {}
@@ -61,17 +61,20 @@ export type TestChild =
 
 async function runTestTree(tree: TestTree) {
   const context: Context = {
-    failed: false,
+    passes: 0,
+    failures: 0,
     stack: [],
   };
   await runTestTreeHelper(context, tree);
-  if (context.failed) {
+  logSummary(context);
+  if (context.failures > 0) {
     process.exit(1);
   }
 }
 
-type Context = {
-  failed: boolean;
+export type Context = {
+  passes: number;
+  failures: number;
   stack: Array<{
     description: string;
     aroundEachs: Array<(test: Test) => () => Promise<void>>;
@@ -102,13 +105,14 @@ async function runTestTreeHelper(
             }
           }
           await test();
+          context.passes++;
           log(context.stack, "passed");
         } catch (exception) {
           if (!(exception instanceof StrTestFailure)) {
             console.error(`EXCEPTION: ${exception}`);
           }
+          context.failures++;
           log(context.stack, "failed");
-          context.failed = true;
         }
         break;
       }
