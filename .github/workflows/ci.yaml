@@ -31,5 +31,4 @@ jobs:
         run: |
           echo $PATH
           go version
-          bark
           just integration
