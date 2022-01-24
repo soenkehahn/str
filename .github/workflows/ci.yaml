@@ -10,7 +10,6 @@ on:
 
 jobs:
   all:
-    name: All
     runs-on: ubuntu-latest
     steps:
       - name: Install just
