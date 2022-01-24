@@ -17,21 +17,21 @@ build:
   go build cmd/str.go
 
 test *args="": typescript-library-bundle build
-  cargo ltest --test basic -- {{ args }}
-  cargo ltest --test assertions -- {{ args }}
-  cargo ltest --test async -- {{ args }}
-  cargo ltest --test exceptions -- {{ args }}
-  cargo ltest --test colors -- {{ args }}
-  cargo ltest --test multiple_files -- {{ args }}
+  cargo test --test basic -- {{ args }}
+  cargo test --test assertions -- {{ args }}
+  cargo test --test async -- {{ args }}
+  cargo test --test exceptions -- {{ args }}
+  cargo test --test colors -- {{ args }}
+  cargo test --test multiple_files -- {{ args }}
 
 integration: typescript-library-bundle build
-  (cargo ltest --test integration -- --test-threads=1)
+  (cargo test --test integration -- --test-threads=1)
 
 run-example: setup typescript-library-bundle
   (cd example && go run ../cmd/str.go simple.ts || true)
 
 clippy:
-  cargo lclippy --tests
+  cargo clippy --tests
 
 render-readme:
   php README.php > README.md
