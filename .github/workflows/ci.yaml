@@ -31,4 +31,4 @@ jobs:
         run: |
           echo $PATH
           go version
-          just integration
+          just ci
