@@ -25,6 +25,7 @@ fn it_catches_exceptions() -> Result<()> {
             index.test.ts -> a FAILED
             index.test.ts -> b ...
             index.test.ts -> b PASSED
+            Ran 2 tests, 1 passed, 1 failed.
         ",
     )?;
     Ok(())
@@ -52,6 +53,7 @@ fn it_catches_undefined_identifiers() -> Result<()> {
             index.test.ts -> a FAILED
             index.test.ts -> b ...
             index.test.ts -> b PASSED
+            Ran 2 tests, 1 passed, 1 failed.
         ",
     )?;
     Ok(())
@@ -81,6 +83,7 @@ fn it_catches_async_exceptions() -> Result<()> {
             index.test.ts -> a FAILED
             index.test.ts -> b ...
             index.test.ts -> b PASSED
+            Ran 2 tests, 1 passed, 1 failed.
         ",
     )?;
     Ok(())
@@ -113,6 +116,7 @@ fn after_each_gets_run_when_it_throws() -> Result<()> {
             index.test.ts -> b ...
             afterEach
             index.test.ts -> b PASSED
+            Ran 2 tests, 1 passed, 1 failed.
         ",
     )?;
     Ok(())
@@ -138,6 +142,7 @@ fn prints_exceptions_in_before_eachs() -> Result<()> {
             index.test.ts -> a ...
             EXCEPTION: test error
             index.test.ts -> a FAILED
+            Ran 1 test, 0 passed, 1 failed.
         ",
     )?;
     Ok(())

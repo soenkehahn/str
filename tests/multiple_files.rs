@@ -28,6 +28,7 @@ fn with_passing_tests() -> Result<()> {
             a.test.ts -> a PASSED
             b.test.ts -> b ...
             b.test.ts -> b PASSED
+            Ran 2 tests, 2 passed, 0 failed.
         ",
     )?;
     Ok(())
@@ -73,6 +74,7 @@ fn with_failures() -> Result<()> {
             b.test.ts -> b PASSED
             c.test.ts -> c ...
             c.test.ts -> c PASSED
+            Ran 4 tests, 3 passed, 1 failed.
         ",
     )?;
     Ok(())

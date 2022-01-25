@@ -27,6 +27,7 @@ fn simple_test_failure() -> Result<()> {
                 !==
             false
             src/index.test.ts -> fails FAILED
+            Ran 1 test, 0 passed, 1 failed.
         ",
     )?;
     Ok(())
@@ -50,6 +51,7 @@ fn simple_test_success() -> Result<()> {
         "
             src/index.test.ts -> works ...
             src/index.test.ts -> works PASSED
+            Ran 1 test, 1 passed, 0 failed.
         ",
     )?;
     Ok(())
@@ -74,6 +76,7 @@ fn typescript_gets_compiled_to_javascript() -> Result<()> {
         "
             src/index.test.ts -> works ...
             src/index.test.ts -> works PASSED
+            Ran 1 test, 1 passed, 0 failed.
         ",
     )?;
     Ok(())
@@ -104,6 +107,7 @@ fn multiple_tests_passing() -> Result<()> {
             src/index.test.ts -> works PASSED
             src/index.test.ts -> works too ...
             src/index.test.ts -> works too PASSED
+            Ran 2 tests, 2 passed, 0 failed.
         ",
     )?;
     Ok(())
@@ -137,6 +141,7 @@ fn multiple_tests_last_failing() -> Result<()> {
                 !==
             false
             src/index.test.ts -> fails FAILED
+            Ran 2 tests, 1 passed, 1 failed.
         ",
     )?;
     Ok(())
@@ -168,6 +173,7 @@ fn multiple_tests_first_failing() -> Result<()> {
             src/index.test.ts -> fails FAILED
             src/index.test.ts -> works ...
             src/index.test.ts -> works PASSED
+            Ran 2 tests, 1 passed, 1 failed.
         ",
     )?;
     Ok(())
@@ -202,6 +208,7 @@ fn multiple_failing_tests() -> Result<()> {
                 !==
             false
             src/index.test.ts -> fails too FAILED
+            Ran 2 tests, 0 passed, 2 failed.
         ",
     )?;
     Ok(())
@@ -233,6 +240,7 @@ fn jsx_and_tsx() -> Result<()> {
         "
             src/index.test.tsx -> works ...
             src/index.test.tsx -> works PASSED
+            Ran 1 test, 1 passed, 0 failed.
         ",
     )?;
     Ok(())
@@ -265,6 +273,7 @@ fn local_imports() -> Result<()> {
         "
             index.test.ts -> works ...
             index.test.ts -> works PASSED
+            Ran 1 test, 1 passed, 0 failed.
         ",
     )?;
     Ok(())
@@ -297,6 +306,7 @@ fn local_imports_with_tsx_extension() -> Result<()> {
         "
             index.test.ts -> works ...
             index.test.ts -> works PASSED
+            Ran 1 test, 1 passed, 0 failed.
         ",
     )?;
     Ok(())
@@ -329,6 +339,7 @@ fn local_imports_in_subdirectories() -> Result<()> {
         "
             index.test.ts -> works ...
             index.test.ts -> works PASSED
+            Ran 1 test, 1 passed, 0 failed.
         ",
     )?;
     Ok(())
@@ -361,6 +372,7 @@ fn local_imports_of_index_files() -> Result<()> {
         "
             index.test.ts -> works ...
             index.test.ts -> works PASSED
+            Ran 1 test, 1 passed, 0 failed.
         ",
     )?;
     Ok(())
@@ -459,6 +471,7 @@ fn reexport_ts_types() -> Result<()> {
         r#"
             index.test.ts -> works ...
             index.test.ts -> works PASSED
+            Ran 1 test, 1 passed, 0 failed.
         "#,
     )?;
     Ok(())
@@ -484,6 +497,7 @@ fn __dirname_works_as_intended() -> Result<()> {
                 index.test.ts -> test ...
                 __dirname: {}
                 index.test.ts -> test PASSED
+                Ran 1 test, 1 passed, 0 failed.
             "#,
             context.temp_dir.path().to_string_lossy(),
         ),
@@ -520,6 +534,7 @@ fn __dirname_works_in_subdirectories() -> Result<()> {
                 index.test.ts -> test ...
                 __dirname: {}/subdir
                 index.test.ts -> test PASSED
+                Ran 1 test, 1 passed, 0 failed.
             "#,
             context.temp_dir.path().to_string_lossy(),
         ),
@@ -561,6 +576,7 @@ fn node_apis() -> Result<()> {
         0,
         "
             file
+            Ran 0 tests, 0 passed, 0 failed.
         ",
     )?;
     Ok(())

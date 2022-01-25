@@ -43,6 +43,7 @@ fn integration_test() -> Result<()> {
                 !==
             false
             failing.test.ts -> fails FAILED
+            Ran 1 test, 0 passed, 1 failed.
         "
         .unindent()
     );
@@ -53,6 +54,7 @@ fn integration_test() -> Result<()> {
         "
             passing.test.ts -> passes ...
             passing.test.ts -> passes PASSED
+            Ran 1 test, 1 passed, 0 failed.
         "
         .unindent()
     );

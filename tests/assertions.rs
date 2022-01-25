@@ -23,6 +23,7 @@ fn describe_simple() -> Result<()> {
         r#"
             index.test.ts -> description -> works ...
             index.test.ts -> description -> works PASSED
+            Ran 1 test, 1 passed, 0 failed.
         "#,
     )?;
     Ok(())
@@ -68,6 +69,7 @@ fn describe_bigger() -> Result<()> {
                 !==
             false
             index.test.ts -> fails FAILED
+            Ran 4 tests, 3 passed, 1 failed.
         "#,
     )?;
     Ok(())
@@ -101,6 +103,7 @@ fn describe_pops_description_stack_correctly_after_failures() -> Result<()> {
             index.test.ts -> description -> fails FAILED
             index.test.ts -> works ...
             index.test.ts -> works PASSED
+            Ran 2 tests, 1 passed, 1 failed.
         "#,
     )?;
     Ok(())
@@ -136,6 +139,7 @@ fn before_each_is_run_before_every_test() -> Result<()> {
             index.test.ts -> works ...
             set
             index.test.ts -> works PASSED
+            Ran 2 tests, 2 passed, 0 failed.
         "#,
     )?;
     Ok(())
@@ -164,6 +168,7 @@ fn before_each_works_when_declared_later() -> Result<()> {
             index.test.ts -> works ...
             set
             index.test.ts -> works PASSED
+            Ran 1 test, 1 passed, 0 failed.
         "#,
     )?;
     Ok(())
@@ -197,6 +202,7 @@ fn before_each_is_run_only_for_tests_in_its_scope() -> Result<()> {
             index.test.ts -> scope -> inner PASSED
             index.test.ts -> outer ...
             index.test.ts -> outer PASSED
+            Ran 3 tests, 3 passed, 0 failed.
         "#,
     )?;
     Ok(())
@@ -229,6 +235,7 @@ fn before_each_can_be_declared_multiple_times() -> Result<()> {
             index.test.ts -> works ...
             [ 1, 2 ]
             index.test.ts -> works PASSED
+            Ran 1 test, 1 passed, 0 failed.
         "#,
     )?;
     Ok(())
@@ -276,6 +283,7 @@ fn before_each_can_be_stacked() -> Result<()> {
             index.test.ts -> outer ...
             [ 'outer beforeEach' ]
             index.test.ts -> outer PASSED
+            Ran 3 tests, 3 passed, 0 failed.
         "#,
     )?;
     Ok(())
@@ -313,6 +321,7 @@ fn before_each_on_the_top_level_will_be_run_for_every_nested_test() -> Result<()
             index.test.ts -> nested -> inner ...
             [ 'outer beforeEach', 'inner beforeEach' ]
             index.test.ts -> nested -> inner PASSED
+            Ran 2 tests, 2 passed, 0 failed.
         "#,
     )?;
     Ok(())
@@ -350,6 +359,7 @@ fn after_each_simple() -> Result<()> {
             index.test.ts -> b ...
             1
             index.test.ts -> b PASSED
+            Ran 2 tests, 2 passed, 0 failed.
         "#,
     )?;
     Ok(())
@@ -390,6 +400,7 @@ fn after_each_can_be_declared_multiple_times() -> Result<()> {
             index.test.ts -> b ...
             2
             index.test.ts -> b PASSED
+            Ran 2 tests, 2 passed, 0 failed.
         "#,
     )?;
     Ok(())
@@ -431,6 +442,7 @@ fn after_each_when_nested_is_executed_bottom_up() -> Result<()> {
             inner afterEach: {"outer":"outer set","inner":"inner set"}
             outer afterEach: {"outer":"outer set"}, typeof inner: undefined
             index.test.ts -> nested -> test PASSED
+            Ran 1 test, 1 passed, 0 failed.
         "#,
     )?;
     Ok(())
@@ -454,6 +466,7 @@ fn after_each_can_be_declared_later() -> Result<()> {
             index.test.ts -> test ...
             afterEach
             index.test.ts -> test PASSED
+            Ran 1 test, 1 passed, 0 failed.
         "#,
     )?;
     Ok(())
@@ -488,6 +501,7 @@ fn before_all_runs_before_all_tests_once() -> Result<()> {
             index.test.ts -> b ...
             1
             index.test.ts -> b PASSED
+            Ran 2 tests, 2 passed, 0 failed.
         "#,
     )?;
     Ok(())
@@ -516,6 +530,7 @@ fn before_all_runs_before_all_tests_when_declared_later() -> Result<()> {
             index.test.ts -> a ...
             set
             index.test.ts -> a PASSED
+            Ran 1 test, 1 passed, 0 failed.
         "#,
     )?;
     Ok(())
@@ -559,6 +574,7 @@ fn before_all_is_run_only_for_tests_in_its_scope() -> Result<()> {
             index.test.ts -> outer ...
             inner value
             index.test.ts -> outer PASSED
+            Ran 3 tests, 3 passed, 0 failed.
         "#,
     )?;
     Ok(())
@@ -590,6 +606,7 @@ fn before_all_can_be_declared_multiple_times() -> Result<()> {
             index.test.ts -> works ...
             [ 1, 2 ]
             index.test.ts -> works PASSED
+            Ran 1 test, 1 passed, 0 failed.
         "#,
     )?;
     Ok(())

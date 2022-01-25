@@ -1,5 +1,4 @@
 - Rename project to something that's easier to google
-- set up CI
 - set up eslint
 - setup tsc for example
 - Set up CI for different node versions

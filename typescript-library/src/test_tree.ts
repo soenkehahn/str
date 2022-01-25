@@ -1,26 +1,41 @@
-import { log } from "./logging";
+import { log, logSummary } from "./logging";
 import { exhaustivenessCheck } from "./utils";
 
 export class StrTestFailure {}
 
 export type StrTestRunner = {
-  testFile: string | null;
-  stack: Array<TestTree>;
-  stackCurrent: () => TestTree;
+  _stack: Array<TestTree>;
+  _stackCurrent: () => TestTree;
+  enterTestFile: (
+    testFileName: string,
+    dynamicImport: () => Promise<void>
+  ) => Promise<void>;
   runTests: () => Promise<void>;
 };
 
 const newStrTestRunner = (): StrTestRunner => {
-  let result: StrTestRunner;
-  result = {
-    testFile: null,
-    stack: [newTestTree()],
-    stackCurrent: () => result.stack[result.stack.length - 1],
+  let strTestRunner: StrTestRunner;
+  strTestRunner = {
+    _stack: [newTestTree()],
+    _stackCurrent: () => strTestRunner._stack[strTestRunner._stack.length - 1],
+    enterTestFile: async (
+      testFileName: string,
+      dynamicImport: () => Promise<void>
+    ) => {
+      let child: TestChild = {
+        tag: "test file",
+        tree: newTestTree(),
+      };
+      _strTestRunner._stackCurrent().children.push([testFileName, child]);
+      _strTestRunner._stack.push(child.tree);
+      await dynamicImport();
+      _strTestRunner._stack.pop();
+    },
     runTests: async () => {
-      await runTestTree(result.testFile, result.stack[0]);
+      await runTestTree(strTestRunner._stack[0]);
     },
   };
-  return result;
+  return strTestRunner;
 };
 
 type Test = () => void | Promise<void>;
@@ -41,21 +56,25 @@ export const newTestTree = (): TestTree => ({
 
 export type TestChild =
   | { tag: "it"; test: Test }
-  | { tag: "describe"; tree: TestTree };
+  | { tag: "describe"; tree: TestTree }
+  | { tag: "test file"; tree: TestTree };
 
-async function runTestTree(fileName: string | null, tree: TestTree) {
+async function runTestTree(tree: TestTree) {
   const context: Context = {
-    fails: false,
-    stack: fileName ? [{ description: fileName, aroundEachs: [] }] : [],
+    passes: 0,
+    failures: 0,
+    stack: [],
   };
   await runTestTreeHelper(context, tree);
-  if (context.fails) {
+  logSummary(context);
+  if (context.failures > 0) {
     process.exit(1);
   }
 }
 
-type Context = {
-  fails: boolean;
+export type Context = {
+  passes: number;
+  failures: number;
   stack: Array<{
     description: string;
     aroundEachs: Array<(test: Test) => () => Promise<void>>;
@@ -86,17 +105,22 @@ async function runTestTreeHelper(
             }
           }
           await test();
+          context.passes++;
           log(context.stack, "passed");
         } catch (exception) {
           if (!(exception instanceof StrTestFailure)) {
             console.error(`EXCEPTION: ${exception}`);
           }
+          context.failures++;
           log(context.stack, "failed");
-          context.fails = true;
         }
         break;
       }
       case "describe": {
+        await runTestTreeHelper(context, child.tree);
+        break;
+      }
+      case "test file": {
         await runTestTreeHelper(context, child.tree);
         break;
       }

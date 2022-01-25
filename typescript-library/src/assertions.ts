@@ -10,15 +10,15 @@ export function describe(description: string, inner: () => void): void {
     tag: "describe",
     tree: newTestTree(),
   };
-  _strTestRunner.stackCurrent().children.push([description, child]);
+  _strTestRunner._stackCurrent().children.push([description, child]);
 
-  _strTestRunner.stack.push(child.tree);
+  _strTestRunner._stack.push(child.tree);
   inner();
-  _strTestRunner.stack.pop();
+  _strTestRunner._stack.pop();
 }
 
 export function it(testName: string, test: () => void | Promise<void>): void {
-  _strTestRunner.stackCurrent().children.push([testName, { tag: "it", test }]);
+  _strTestRunner._stackCurrent().children.push([testName, { tag: "it", test }]);
 }
 
 export function assertEq<T>(a: T, b: T): void {
