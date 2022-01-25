@@ -39,7 +39,6 @@ describe("my app", () => {
 ## How to run the tests
 - Install [rust](https://www.rust-lang.org/).
 - Install [just](https://github.com/casey/just)
-- Clone the repo into `$STR_REPO`.
 - `cd $STR_REPO`
 - Run all tests and checks with `just ci`.
 - Run only the faster tests with `just test`.
