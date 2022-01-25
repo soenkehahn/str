@@ -1,13 +1,17 @@
 # `str` -- a simple typescript test-runner
 
+**THIS PROJECT IS AN EXPERIMENT**
+
 `str` aims to be a very simple test runner for test-suites written
 in typescript.
 
 ## Installation from source
 
-- Install [rust](https://www.rust-lang.org/).
+- Install [go](https://go.dev/)
 - Clone the repo into `$STR_REPO`.
-- Install with `cd $STR_REPO ; cargo install --path .`.
+- `cd $STR_REPO`
+- Build with `go build cmd/str.go`.
+- Install with e.g. `cp str /usr/local/bin/`.
 
 ## How to use it?
 
@@ -31,3 +35,11 @@ describe("my app", () => {
 
 - Run your test-suite with:
   `str $FILE_NAME`
+
+## How to run the tests
+- Install [rust](https://www.rust-lang.org/).
+- Install [just](https://github.com/casey/just)
+- Clone the repo into `$STR_REPO`.
+- `cd $STR_REPO`
+- Run all tests and checks with `just ci`.
+- Run only the faster tests with `just test`.
