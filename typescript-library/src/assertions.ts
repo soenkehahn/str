@@ -21,6 +21,8 @@ export function it(testName: string, test: () => void | Promise<void>): void {
   _strTestRunner._stackCurrent().children.push([testName, { tag: "it", test }]);
 }
 
+export const test = it;
+
 export function assertEq<T>(a: T, b: T): void {
   if (a !== b) {
     console.error(`${a}\n    !==\n${b}`);
