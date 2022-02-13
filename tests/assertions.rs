@@ -611,3 +611,31 @@ fn before_all_can_be_declared_multiple_times() -> Result<()> {
     )?;
     Ok(())
 }
+
+#[test]
+fn test_alias() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { test } from "str";
+            test("works", () => {});
+            test("fails", () => {
+                throw "foo";
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        1,
+        r#"
+            index.test.ts -> works ...
+            index.test.ts -> works PASSED
+            index.test.ts -> fails ...
+            EXCEPTION: foo
+            index.test.ts -> fails FAILED
+            Ran 2 tests, 1 passed, 1 failed.
+        "#,
+    )?;
+    Ok(())
+}
