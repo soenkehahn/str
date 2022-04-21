@@ -385,18 +385,15 @@ fn errors_contain_source_location() -> Result<()> {
         "index.test.ts",
         r#"
             import { assertEq, it } from "str";
-            import { something } from "missing";
-            import { somethingElse } from "./also_missing";
+            import { something } from "./missing";
             it("works", () => {
-                assertEq(something, somethingElse);
+                assertEq(something);
             });
         "#,
     )?;
     let stderr = context.run_assert_stderr("index.test.ts", 1);
-    assert_contains(&stderr, "Could not resolve \"missing\"");
+    assert_contains(&stderr, "Could not resolve \"./missing\"");
     assert_contains(&stderr, "index.test.ts:3:38");
-    assert_contains(&stderr, "Could not resolve \"./also_missing\"");
-    assert_contains(&stderr, "index.test.ts:4:42");
     Ok(())
 }
 
@@ -434,12 +431,12 @@ fn bundling_errors_mean_node_will_not_be_run() -> Result<()> {
     context.write(
         "index.test.ts",
         r#"
-            import { something } from "missing";
+            import { something } from "./missing";
             something();
         "#,
     )?;
     let stderr = context.run_assert_stderr("index.test.ts", 1);
-    assert_contains(&stderr, "Could not resolve \"missing\"");
+    assert_contains(&stderr, "Could not resolve \"./missing\"");
     assert_contains(&stderr, "index.test.ts:2:38");
     assert!(!stderr.contains("node"));
     Ok(())

@@ -16,7 +16,7 @@ use unindent::Unindent;
 pub fn assert_contains<A: AsRef<str>, B: AsRef<str>>(a: A, b: B) {
     assert!(
         a.as_ref().contains(b.as_ref()),
-        "\nassert_contains(\n\n  {:?},\n\n  {:?}\n\n)\n",
+        "=========\n{:?},\n\ndid not contain\n\n{:?}\n=========\n",
         a.as_ref(),
         b.as_ref()
     );

@@ -16,7 +16,7 @@ func bundle(inputCode string, outputFile string) error {
 			ResolveDir: ".",
 			Sourcefile: "<str test runner>",
 		},
-		Plugins: []api.Plugin{injectDirname},
+		Plugins: []api.Plugin{injectDirname, nonRelativeImportsAreExternal},
 	})
 	if len(buildResult.Errors) > 0 {
 		formattedErrors := api.FormatMessages(buildResult.Errors, api.FormatMessagesOptions{
@@ -34,4 +34,14 @@ type BundleError struct{}
 
 func (e *BundleError) Error() string {
 	return "bundle error"
+}
+
+var nonRelativeImportsAreExternal api.Plugin = api.Plugin{
+	Name: "make node_modules external",
+	Setup: func(build api.PluginBuild) {
+		build.OnResolve(api.OnResolveOptions{Filter: "^[^\\.]"},
+			func(args api.OnResolveArgs) (api.OnResolveResult, error) {
+				return api.OnResolveResult{External: true}, nil
+			})
+	},
 }

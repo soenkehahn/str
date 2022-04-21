@@ -23,6 +23,7 @@ test *args="": typescript-library-bundle build
   cargo test --test exceptions -- {{ args }}
   cargo test --test colors -- {{ args }}
   cargo test --test multiple_files -- {{ args }}
+  cargo test --test node_modules -- {{ args }}
 
 integration: typescript-library-bundle build
   (cargo test --test integration -- --test-threads=1)
