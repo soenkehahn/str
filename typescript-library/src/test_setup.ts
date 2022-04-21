@@ -22,11 +22,5 @@ export function beforeAll(f: () => void | Promise<void>): void {
 }
 
 export function afterAll(f: () => void | Promise<void>): void {
-  _strTestRunner._stackCurrent().aroundEachs.push((test) => async () => {
-    try {
-      await test();
-    } finally {
-      await f();
-    }
-  });
+  _strTestRunner._stackCurrent().afterAlls.push(f);
 }
