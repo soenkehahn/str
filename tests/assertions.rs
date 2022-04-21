@@ -613,6 +613,62 @@ fn before_all_can_be_declared_multiple_times() -> Result<()> {
 }
 
 #[test]
+fn after_all_runs_after_all_tests() -> Result<()> {
+    let context = Context::new()?;
+    context.write("file", "foo")?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { it, afterAll } from "str";
+            import { readFileSync, writeFileSync } from "fs";
+            it("works", () => {
+                const content = readFileSync("file").toString();
+                console.error(content);
+            });
+            afterAll(() => {
+                writeFileSync("file", "bar");
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> works ...
+            foo
+            index.test.ts -> works PASSED
+            Ran 1 test, 1 passed, 0 failed.
+        "#,
+    )?;
+    assert_eq!(context.read("file")?, "bar");
+    Ok(())
+}
+
+#[test]
+#[ignore]
+fn after_all_runs_after_all_tests_once() -> Result<()> {
+    Ok(())
+}
+
+#[test]
+#[ignore]
+fn after_all_runs_after_all_tests_if_declared_first() -> Result<()> {
+    Ok(())
+}
+
+#[test]
+#[ignore]
+fn after_all_can_be_declared_multiple_times() -> Result<()> {
+    Ok(())
+}
+
+#[test]
+#[ignore]
+fn after_all_is_only_run_for_tests_in_its_scope() -> Result<()> {
+    Ok(())
+}
+
+#[test]
 fn test_alias() -> Result<()> {
     let context = Context::new()?;
     context.write(
