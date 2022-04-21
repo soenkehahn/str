@@ -619,10 +619,10 @@ fn after_all_runs_after_all_tests() -> Result<()> {
         "index.test.ts",
         r#"
             import { it, afterAll } from "str";
-            it("works", () => {});
             afterAll(() => {
                 console.error("afterAll");
             });
+            it("works", () => {});
         "#,
     )?;
     context.run_assert(
@@ -645,11 +645,11 @@ fn after_all_runs_after_all_tests_once() -> Result<()> {
         "index.test.ts",
         r#"
             import { it, afterAll } from "str";
-            it("works", () => {});
-            it("works 2", () => {});
             afterAll(() => {
                 console.error("afterAll");
             });
+            it("works", () => {});
+            it("works 2", () => {});
         "#,
     )?;
     context.run_assert(
@@ -662,32 +662,6 @@ fn after_all_runs_after_all_tests_once() -> Result<()> {
             index.test.ts -> works 2 PASSED
             afterAll
             Ran 2 tests, 2 passed, 0 failed.
-        "#,
-    )?;
-    Ok(())
-}
-
-#[test]
-fn after_all_runs_after_all_tests_if_declared_first() -> Result<()> {
-    let context = Context::new()?;
-    context.write(
-        "index.test.ts",
-        r#"
-            import { it, afterAll } from "str";
-            afterAll(() => {
-                console.error("afterAll");
-            });
-            it("works", () => {});
-        "#,
-    )?;
-    context.run_assert(
-        "index.test.ts",
-        0,
-        r#"
-            index.test.ts -> works ...
-            index.test.ts -> works PASSED
-            afterAll
-            Ran 1 test, 1 passed, 0 failed.
         "#,
     )?;
     Ok(())
