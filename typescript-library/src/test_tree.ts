@@ -45,6 +45,7 @@ type TestTree = {
   beforeEachs: Array<() => void>;
   aroundEachs: Array<(test: Test) => () => Promise<void>>;
   beforeAlls: Array<() => void | Promise<void>>;
+  afterAlls: Array<() => void | Promise<void>>;
 };
 
 export const newTestTree = (): TestTree => ({
@@ -52,6 +53,7 @@ export const newTestTree = (): TestTree => ({
   beforeEachs: [],
   aroundEachs: [],
   beforeAlls: [],
+  afterAlls: [],
 });
 
 export type TestChild =
@@ -130,6 +132,9 @@ async function runTestTreeHelper(
       }
     }
     context.stack.pop();
+  }
+  for (const f of tree.afterAlls) {
+    await f();
   }
 }
 

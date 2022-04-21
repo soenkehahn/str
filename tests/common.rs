@@ -13,12 +13,6 @@ use std::process::ExitStatus;
 use tempfile::TempDir;
 use unindent::Unindent;
 
-#[derive(Debug)]
-pub struct Context {
-    pub temp_dir: TempDir,
-    repo_dir: PathBuf,
-}
-
 pub fn assert_contains<A: AsRef<str>, B: AsRef<str>>(a: A, b: B) {
     assert!(
         a.as_ref().contains(b.as_ref()),
@@ -26,6 +20,12 @@ pub fn assert_contains<A: AsRef<str>, B: AsRef<str>>(a: A, b: B) {
         a.as_ref(),
         b.as_ref()
     );
+}
+
+#[derive(Debug)]
+pub struct Context {
+    pub temp_dir: TempDir,
+    repo_dir: PathBuf,
 }
 
 impl Context {
@@ -52,6 +52,11 @@ impl Context {
         create_dir_all(&dir)?;
         fs::write(file, content)?;
         Ok(())
+    }
+
+    pub fn read<P: AsRef<Path>>(&self, path: P) -> Result<String> {
+        let file = self.temp_dir.path().join(path.as_ref());
+        Ok(fs::read_to_string(file)?)
     }
 
     pub fn run(&self, args: &str) -> Output {

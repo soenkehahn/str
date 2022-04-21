@@ -613,6 +613,125 @@ fn before_all_can_be_declared_multiple_times() -> Result<()> {
 }
 
 #[test]
+fn after_all_runs_after_all_tests() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { it, afterAll } from "str";
+            afterAll(() => {
+                console.error("afterAll");
+            });
+            it("works", () => {});
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> works ...
+            index.test.ts -> works PASSED
+            afterAll
+            Ran 1 test, 1 passed, 0 failed.
+        "#,
+    )?;
+    Ok(())
+}
+
+#[test]
+fn after_all_runs_after_all_tests_once() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { it, afterAll } from "str";
+            afterAll(() => {
+                console.error("afterAll");
+            });
+            it("works", () => {});
+            it("works 2", () => {});
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> works ...
+            index.test.ts -> works PASSED
+            index.test.ts -> works 2 ...
+            index.test.ts -> works 2 PASSED
+            afterAll
+            Ran 2 tests, 2 passed, 0 failed.
+        "#,
+    )?;
+    Ok(())
+}
+
+#[test]
+fn after_all_can_be_declared_multiple_times() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { it, afterAll } from "str";
+            afterAll(() => {
+                console.error("afterAll 1");
+            });
+            afterAll(() => {
+                console.error("afterAll 2");
+            });
+            it("works", () => {});
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> works ...
+            index.test.ts -> works PASSED
+            afterAll 1
+            afterAll 2
+            Ran 1 test, 1 passed, 0 failed.
+        "#,
+    )?;
+    Ok(())
+}
+
+#[test]
+fn after_all_is_only_run_for_tests_in_its_scope() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { assertEq, it, afterAll, describe } from "str";
+            it("outer", () => {});
+            describe("scope", () => {
+                afterAll(() => {
+                    console.error("afterEach");
+                });
+                it("inner", () => {});
+            });
+            it("outer", () => {});
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> outer ...
+            index.test.ts -> outer PASSED
+            index.test.ts -> scope -> inner ...
+            index.test.ts -> scope -> inner PASSED
+            afterEach
+            index.test.ts -> outer ...
+            index.test.ts -> outer PASSED
+            Ran 3 tests, 3 passed, 0 failed.
+        "#,
+    )?;
+    Ok(())
+}
+
+#[test]
 fn test_alias() -> Result<()> {
     let context = Context::new()?;
     context.write(
