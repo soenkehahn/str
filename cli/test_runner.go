@@ -73,9 +73,17 @@ func writeFile(file string, content string) error {
 
 func (runner *runner) runBundle(bundleFile string) error {
 	command := exec.Command("node", bundleFile)
+	workingDirectory, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	command.Env = append(
+		os.Environ(),
+		fmt.Sprintf("NODE_PATH=%s/node_modules", workingDirectory),
+	)
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
-	err := command.Run()
+	err = command.Run()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			if status, ok := exitErr.Sys().(syscall.WaitStatus); ok {
