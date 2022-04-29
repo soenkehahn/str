@@ -88,6 +88,9 @@ func (runner *runner) runBundle(bundleFile string) error {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			if status, ok := exitErr.Sys().(syscall.WaitStatus); ok {
 				if status.ExitStatus() != 0 {
+					if status.Signaled() {
+						fmt.Println(exitErr.Error())
+					}
 					runner.failed = true
 				}
 				return nil
