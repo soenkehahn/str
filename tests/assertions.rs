@@ -758,3 +758,29 @@ fn test_alias() -> Result<()> {
     )?;
     Ok(())
 }
+
+#[test]
+fn xit() -> Result<()> {
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { it, xit } from "str";
+            it("works", () => {});
+            xit("is ignored", () => {
+                throw "foo";
+            });
+        "#,
+    )?;
+    context.run_assert(
+        "index.test.ts",
+        0,
+        r#"
+            index.test.ts -> works ...
+            index.test.ts -> works PASSED
+            index.test.ts -> is ignored IGNORED
+            Ran 1 test, 1 passed, 0 failed, 1 ignored.
+        "#,
+    )?;
+    Ok(())
+}

@@ -1,7 +1,7 @@
 import { exhaustivenessCheck } from "./utils";
 import { Context } from "./test_tree";
 
-export type LogKind = "start" | "passed" | "failed";
+export type LogKind = "start" | "passed" | "failed" | "ignored";
 
 export function log(stack: Array<{ description: string }>, kind: LogKind) {
   const description = stack.map((x) => x.description).join(" -> ");
@@ -23,6 +23,11 @@ export function log(stack: Array<{ description: string }>, kind: LogKind) {
       kindSnippet = "FAILED";
       break;
     }
+    case "ignored": {
+      color = yellow;
+      kindSnippet = "IGNORED";
+      break;
+    }
     default: {
       exhaustivenessCheck(kind);
       break;
@@ -42,6 +47,9 @@ export function logSummary(context: Context) {
     failures = red(failures);
   }
   message += failures;
+  if (context.ignored > 0) {
+    message += `, ${context.ignored} ignored`;
+  }
   message += `.`;
   console.error(message);
 }
