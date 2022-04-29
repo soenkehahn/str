@@ -37,7 +37,7 @@ func (e *BundleError) Error() string {
 }
 
 var nonRelativeImportsAreExternal api.Plugin = api.Plugin{
-	Name: "make node_modules external",
+	Name: "make non relative imports (e.g. from node_modules) external",
 	Setup: func(build api.PluginBuild) {
 		build.OnResolve(api.OnResolveOptions{Filter: "^[^\\.]"},
 			func(args api.OnResolveArgs) (api.OnResolveResult, error) {
