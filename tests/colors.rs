@@ -162,3 +162,29 @@ fn only_one_test() -> Result<()> {
     )?;
     Ok(())
 }
+
+#[test]
+fn ignored_tests() -> Result<()> {
+    colored::control::set_override(true);
+    let context = Context::new()?;
+    context.write(
+        "index.test.ts",
+        r#"
+            import { xit } from "str";
+            xit("a", () => {});
+        "#,
+    )?;
+    context.run_assert_with_colors(
+        "index.test.ts",
+        0,
+        &vec![
+            "index.test.ts -> a IGNORED".yellow(),
+            format!("Ran 0 tests, {}, 0 failed, 1 ignored.", "0 passed".green()).normal(),
+        ]
+        .into_iter()
+        .map(|string| string.to_string())
+        .collect::<Vec<_>>()
+        .join("\n"),
+    )?;
+    Ok(())
+}

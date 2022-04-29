@@ -23,6 +23,10 @@ export function it(testName: string, test: () => void | Promise<void>): void {
 
 export const test = it;
 
+export function xit(testName: string, _test: () => void | Promise<void>): void {
+  _strTestRunner._stackCurrent().children.push([testName, { tag: "ignored" }]);
+}
+
 export function assertEq<T>(a: T, b: T): void {
   if (a !== b) {
     console.error(`${a}\n    !==\n${b}`);

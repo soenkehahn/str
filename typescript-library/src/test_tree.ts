@@ -58,6 +58,7 @@ export const newTestTree = (): TestTree => ({
 
 export type TestChild =
   | { tag: "it"; test: Test }
+  | { tag: "ignored" }
   | { tag: "describe"; tree: TestTree }
   | { tag: "test file"; tree: TestTree };
 
@@ -65,6 +66,7 @@ async function runTestTree(tree: TestTree) {
   const context: Context = {
     passes: 0,
     failures: 0,
+    ignored: 0,
     stack: [],
   };
   await runTestTreeHelper(context, tree);
@@ -77,6 +79,7 @@ async function runTestTree(tree: TestTree) {
 export type Context = {
   passes: number;
   failures: number;
+  ignored: number;
   stack: Array<{
     description: string;
     aroundEachs: Array<(test: Test) => () => Promise<void>>;
@@ -116,6 +119,11 @@ async function runTestTreeHelper(
           context.failures++;
           log(context.stack, "failed");
         }
+        break;
+      }
+      case "ignored": {
+        context.ignored++;
+        log(context.stack, "ignored");
         break;
       }
       case "describe": {
